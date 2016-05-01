@@ -51,4 +51,4 @@ clean:
 	$(RM) -rf $(WORKDIR) config.log config.status
 
 distclean: clean
-	$(RM) -rf Makefile config.h functions *~ autom4te.cache
+	$(RM) -rf Makefile config.h ldap_passwd functions *~ autom4te.cache
