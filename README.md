@@ -20,14 +20,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 ## Compatibility
-
-RHEL >= 6
-CentOS >= 6
-AnNyung LInux >= 2
+ * RHEL >= 6
+ * CentOS >= 6
+ * AnNyung LInux >= 2
 
 ## Description
 
-ldap-autu-utils is authentification integration tool with ldap
+ldap-auth-utils is authentification integration tool with ldap
 on RHEL or CentOS or AnNyung distribution
 
 This package is composed with follows:
@@ -47,6 +46,7 @@ This package is composed with follows:
   * dependency
     * openldap-clients (ldapadd, ldapdelete, ldapmodify, ldapsearch)
     * openldap-servers (slaptest, slappasswd)
+    * [genpasswd](https://github.com/Joungkyun/genpasswd)
 
   * Configration: @sysconfdir@/ldap-auth-utils.conf
 
@@ -59,11 +59,11 @@ This package is composed with follows:
 ## Usage
 
   * ldap_auth_init
-  ```bash
+   ```bash
 [root@an3 ~]$ ldap_auth_init
 ```
   * ldap_auth
-  ```bash
+   ```bash
 [root@an3 ~]$ # View information LDAP_USER with BASE DN 'dc=DOMAIN,dc=COM'
 [root@an3 ~]$ ldap_auth -u LDAP_USER@DOMAIN.COM
 [root@an3 ~]$
@@ -78,7 +78,7 @@ This package is composed with follows:
 
 ```
   * ldap_useradd
-  ```bash
+   ```bash
 [root@an3 ~]$ # add LDAP_USER with BASE DN 'dc=DOMAIN,dc=COM'
 [root@an3 ~]$ ldap_useradd LDAP_USER@DOMAIN.COM
 [root@an3 ~]$
@@ -87,16 +87,14 @@ This package is composed with follows:
 [root@an3 ~]$
 [root@an3 ~]$ # add LDAP_USER with interactive mode
 [root@an3 ~]$ ldap_useradd -i LDAP_USER@DOMAIN.COM
-
 ```
   * ldap_userdel
-  ```bash
+   ```bash
 # remove LDAP_USER with BASE DN 'dc=DOMAIN,dc=COM'
 ldap_userdel LDAP_USER@DOMAIN.COM
-
 ```
   * ldap_grpadd
-  ```bash
+   ```bash
 [root@an3 ~]$ # add LDAP_GROUP with BASE DN 'dc=DOMAIN,dc=COM'
 [root@an3 ~]$ ldap_grpadd LDAP_GROUP@DOMAIN.COM
 [root@an3 ~]$
@@ -107,7 +105,7 @@ ldap_userdel LDAP_USER@DOMAIN.COM
 [root@an3 ~]$ ldap_grpadd -m member1 -m member2 LDAP_GROUP
 ```
   * ldap_grpdel
-  ```bash
+   ```bash
 [root@an3 ~]$ # remove LDAP_GROUP with BASE DN 'dc=DOMAIN,dc=COM'
 [root@an3 ~]$ ldap_grpdel LDAP_GROUP@DOMAIN.COM
 [root@an3 ~]$
@@ -115,7 +113,7 @@ ldap_userdel LDAP_USER@DOMAIN.COM
 [root@an3 ~]$ ldap_grpdel -m member1 -m member2 LDAP_GROUP
 ```
   * ldap_host_manage
-  ```bash
+   ```bash
 [root@an3 ~]$ # add HOST to LDAP_USER BASE DN 'dc=DOMAIN,dc=COM'
 [root@an3 ~]$ ldap_host_manage LDAP_USER@DOMAIN.COM HOST
 [root@an3 ~]$
@@ -123,7 +121,7 @@ ldap_userdel LDAP_USER@DOMAIN.COM
 [root@an3 ~]$ ldap_host_manage -r LDAP_USER@DOMAIN.COM HOST
 ```
   * ldap_passwd
-  ```bash
+   ```bash
 [root@an3 ~]$ # change password of current login user
 [root@an3 ~]$ ldap_passwd
 [root@an3 ~]$
@@ -135,7 +133,7 @@ ldap_userdel LDAP_USER@DOMAIN.COM
 [root@an3 ~]$ ldap_passwd LADP_USER@DOMAIN.com
 ```
   * ldap_replica
-  ```bash
+   ```bash
 [root@an3 ~]$ # sync changes from ldap.tar.com
 [root@an3 ~]$ ldap_replica -a -u uid=replica,ou=admin,dc=host,dc=com ldap.target.com
 [root@an3 ~]$ # stop sync changes
