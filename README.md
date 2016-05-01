@@ -64,6 +64,17 @@ This package is composed with follows:
 ```
   * ldap_auth
 ```bash
+[root@an3 ~]$ ldap_auth -h
+ldap_auth: managed user or group attributes
+Usage: ldap_auth [OPTIONS] {USER|GROUP}@DOMAIN.COM[ ENTRY MODIFIED_ENTRY_VALUE]
+Options:
+    -d               permit modify duplicated uidNumber/gidNumber
+    -g               searching group
+    -h               display this help message and exit
+    -u               searching account [default option]
+    -y               None intercative mode
+
+[root@an3 ~]$
 [root@an3 ~]$ # View information LDAP_USER with BASE DN 'dc=DOMAIN,dc=COM'
 [root@an3 ~]$ ldap_auth -u LDAP_USER@DOMAIN.COM
 [root@an3 ~]$
@@ -79,6 +90,31 @@ This package is composed with follows:
 ```
   * ldap_useradd
 ```bash
+[root@an3 ~]$ ldap_useradd -h
+ldap_useradd: Add user to LDAP database
+Usage: ldap_useradd [OPTIONS] USERNAME
+Options:
+    -d HOME_DIR      home directory [Default: /home/ldapusers/USERNAME]
+    -e EXPIRE_DATE   expiration date [Default: unlimit(0)]
+                     Fromat is "YYYY-MM-DD HH:mm:SS" or unix timestamp
+    -g GID           ID of the primary group [Default: ldapusers(10000)]
+    -G GROUPS        list of supplementary groups
+    -h               display this help message and exit
+    -H FQDN          host access privileges
+    -i               interactive mode. ignore other options
+    -n NAME          Real Name
+    -l LAST NAME     Last Name
+    -p PASSWORD      password. plain string or hashed string(with {CRYPT})
+    -s SHELL         login shell [Default: /bin/bash]
+    -u UID           user ID [Default: MAXUID + 1]
+    -y               None intercative mode
+    --gecos          Set GECOS field of passwd entry
+
+USERNAME format
+    FROMAT : ACCOUNT@DOMAIN_NAME
+
+    if base dn of LDAP is "dc=DOMAIN,dc=COM", domain name is "DOMAIN.COM".
+
 [root@an3 ~]$ # add LDAP_USER with BASE DN 'dc=DOMAIN,dc=COM'
 [root@an3 ~]$ ldap_useradd LDAP_USER@DOMAIN.COM
 [root@an3 ~]$
@@ -90,11 +126,36 @@ This package is composed with follows:
 ```
   * ldap_userdel
 ```bash
-# remove LDAP_USER with BASE DN 'dc=DOMAIN,dc=COM'
-ldap_userdel LDAP_USER@DOMAIN.COM
+[root@an3 ~]$ ldap_userdel -h
+ldap_userdel: Remove user on LDAP database
+Usage: ldap_userdel [OPTIONS] USERNAME ...
+Options:
+    -y               None intercative mode [default: interactive mode]
+
+USERNAME format
+    FROMAT : ACCOUNT@DOMAIN_NAME
+
+    if base dn of LDAP is "dc=DOMAIN,dc=COM", domain name is "DOMAIN.COM".
+
+[root@an3 ~]$ # remove LDAP_USER with BASE DN 'dc=DOMAIN,dc=COM'
+[root@an3 ~]$ ldap_userdel LDAP_USER@DOMAIN.COM
 ```
   * ldap_grpadd
 ```bash
+[root@an3 ~]$ ldap_grpadd -h
+ldap_grpadd: Add group to LDAP database
+Usage: ldap_grpadd [OPTIONS] GROUPNAME
+Options:
+    -g GID           group id [biggern than 10000
+    -d DESC          group description
+    -m MERBER_NAME   group member. enable multiple
+    -h               display this help message and exit
+
+GROUPNAME format
+    FROMAT : ACCOUNT@DOMAIN_NAME
+
+    if base dn of LDAP is "dc=DOMAIN,dc=COM", domain name is "DOMAIN.COM".
+
 [root@an3 ~]$ # add LDAP_GROUP with BASE DN 'dc=DOMAIN,dc=COM'
 [root@an3 ~]$ ldap_grpadd LDAP_GROUP@DOMAIN.COM
 [root@an3 ~]$
@@ -106,6 +167,18 @@ ldap_userdel LDAP_USER@DOMAIN.COM
 ```
   * ldap_grpdel
 ```bash
+[root@an3 ~]$ ldap_grpdel -h
+ldap_grpdel: Remove group on LDAP database
+Usage: ldap_grpdel [OPTIONS] GROUPNAME
+Options:
+    -m MERBER_NAME   group member. enable multiple
+    -h               display this help message and exit
+
+GROUPRNAME format
+    FROMAT : ACCOUNT@DOMAIN_NAME
+
+    if base dn of LDAP is "dc=DOMAIN,dc=COM", domain name is "DOMAIN.COM".
+
 [root@an3 ~]$ # remove LDAP_GROUP with BASE DN 'dc=DOMAIN,dc=COM'
 [root@an3 ~]$ ldap_grpdel LDAP_GROUP@DOMAIN.COM
 [root@an3 ~]$
@@ -114,6 +187,18 @@ ldap_userdel LDAP_USER@DOMAIN.COM
 ```
   * ldap_host_manage
 ```bash
+[root@an3 ~]$ ldap_host_manage -h
+ldap_host_manage: managed host access privileges
+Usage: ldap_host_manage [OPTIONS] USERNAME HOST1
+Options:
+    -r               remove host
+    -h               display this help message and exit
+
+USERNAME format
+    FROMAT : ACCOUNT@DOMAIN_NAME
+
+    if base dn of LDAP is "dc=DOMAIN,dc=COM", domain name is "DOMAIN.COM".
+
 [root@an3 ~]$ # add HOST to LDAP_USER BASE DN 'dc=DOMAIN,dc=COM'
 [root@an3 ~]$ ldap_host_manage LDAP_USER@DOMAIN.COM HOST
 [root@an3 ~]$
@@ -122,6 +207,20 @@ ldap_userdel LDAP_USER@DOMAIN.COM
 ```
   * ldap_passwd
 ```bash
+[root@an3 ~]$ ldap_passwd -h
+ldap_passwd: change ldap password
+Usage: ldap_passwd [OPTIONS] USERNAME
+Options:
+    -g Group         group out [Default: Group]
+    -h               display this help message and exit
+    -m HASH_ALGO     md5 or sha512 [default: sha512]
+    -u Pepole        Account OU default: People]
+
+USERNAME format
+    FROMAT : ACCOUNT@DOMAIN_NAME
+
+    if base dn of LDAP is "dc=DOMAIN,dc=COM", domain name is "DOMAIN.COM".
+
 [root@an3 ~]$ # change password of current login user
 [root@an3 ~]$ ldap_passwd
 [root@an3 ~]$
@@ -134,6 +233,15 @@ ldap_userdel LDAP_USER@DOMAIN.COM
 ```
   * ldap_replica
 ```bash
+[root@an3 ~]$ ldap_replica -h
+ldap_replica: management ldap 2way multi master replication
+Usage: ldap_replica [OPTIONS] REPLICA_SERVER
+Options:
+    -a               add replcation configuration on this server
+    -i               Server ID on this server [default: RAMDOM]
+    -r               remove replication configuration on this server
+    -u USER_RDN      replication user dn
+
 [root@an3 ~]$ # sync changes from ldap.tar.com
 [root@an3 ~]$ ldap_replica -a -u uid=replica,ou=admin,dc=host,dc=com ldap.target.com
 [root@an3 ~]$ # stop sync changes
