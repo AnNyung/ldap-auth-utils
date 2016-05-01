@@ -1,0 +1,202 @@
+#!/bin/bash
+
+# ldap_host_manage - managed host access privileges
+# Copyright (C) 2016  JoungKyun.Kim <http://oops.org>
+#
+# This file is part of ldap-auth-utils
+#
+# ldap-auth-utils is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# ldap-auth-utils is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+source "@datadir@/functions"
+
+help() {
+	stderr "ldap_host_manage: managed host access privileges\n"
+	stderr "Usage: ldap_host_manage [OPTIONS] USERNAME HOST1\n"
+	stderr "Options:\n"
+	stderr "    -r               remove host\n"
+	stderr "    -h               display this help message and exit\n"
+	stderr "\n"
+	stderr "USERNAME format\n"
+	stderr "    FROMAT : ACCOUNT@DOMAIN_NAME\n\n"
+	stderr "    if base dn of LDAP is \"dc=DOMAIN,dc=COM\", domain name is \"DOMAIN.COM\".\n"
+	stderr "\nExamples:\n"
+	stderr "    # add HOST to LDAP_USER BASE DN 'dc=DOMAIN,dc=COM'\n"
+	stderr "    ldap_host_manage LDAP_USER@DOMAIN.COM HOST\n\n"
+	stderr "    # remove HOST to LDAP_USER BASE DN 'dc=DOMAIN,dc=COM'\n"
+	stderr "    ldap_host_manage -r LDAP_USER@DOMAIN.COM HOST\n\n"
+	exit 1
+}
+
+
+conf_context=$(LANG="C" ${cmd_sed} -n -f ${datadir}/config.sed ${confdir}/ldap-auth-utils.conf)
+eval ${conf_context}
+
+USER_DN=${USER_DN:=People}
+GROUP_DN=${GROUP_DN:=Group}
+
+OPT_RM=0
+
+opts=$(${cmd_getopt} -u -n "$(${cmd_basename} "$0")" -o hr -- "$@")
+[ $? -ne 0 ] && help
+
+set -- ${opts}
+while true
+do
+	case "$1" in
+		-r) OPT_RM=1 ;;
+		-h) help ;;
+		--) shift; break;;
+	esac
+	shift
+done
+
+[ $# -ne 2 ] && help
+
+set_basedn_by_domain "$1"
+[ $? -ne 0 ] && \
+	stderr "Error: invalide USERNAME '${OPT_USERID}'\n" && help
+OPT_GRPNAME="${OPT_USERID}"
+
+USER_SCHEME="ou=${USER_DN},${BASEDN}"
+GROUP_SCHEME="ou=${GROUP_DN},${BASEDN}"
+
+OPT_HOST="$2"
+OPT_HOST=$(echo "${OPT_HOST}" | ${cmd_sed} 's/\\//g')
+
+check_user_exists ${OPT_USERID}
+[ $? -eq 1 ] && \
+	stderr "Error: Account '${OPT_USERID}' is not found!!!\n" && \
+	exit 1
+
+
+#
+# Remove host attribute
+#
+if [ ${OPT_RM} -eq 1 ]; then
+	if [ "${OPT_HOST}" = '*' ]; then
+		check_user_attribute ${OPT_USERID} "host"
+		[ $? -ne 0 ] && \
+			stderr "Error: host attribute is not regist!\n" && exit 1
+
+		#${cmd_cat} <<EOF #| ${cmd_ldapmodify} ${LDAP_PRIV} >& /dev/null
+		${cmd_ldapmodify} ${LDAP_PRIV} <<EOF >& /dev/null
+dn: uid=${OPT_USERID},${USER_SCHEME}
+changetype: modify
+delete: host
+${RET_ATTR}
+EOF
+		exit $?
+	else
+		check_user_attribute ${OPT_USERID} "host" "${OPT_HOST}"
+		[ $? -ne 0 ] && \
+			stderr "Error: '${OPT_HOST}' is not regist!\n" && exit 1
+
+		#${cmd_cat} <<EOF #| ${cmd_ldapmodify} ${LDAP_PRIV} >& /dev/null
+		${cmd_ldapmodify} ${LDAP_PRIV} <<EOF >& /dev/null
+dn: uid=${OPT_USERID},${USER_SCHEME}
+changetype: modify
+delete: host
+host: ${OPT_HOST}
+EOF
+		exit $?
+	fi
+	exit 0
+fi
+
+#
+# Add host attribute
+#
+
+## HostObject scheme check
+is_object_enable "hostObject"
+if [ $? -ne 0 ]; then
+	${cmd_cat} <<EOF | ${cmd_ldapadd} -a -c ${LDAP_PRIV} >& /dev/null
+# \$Id: ldapns.schema,v 1.3 2003/05/29 12:57:29 lukeh Exp $
+# LDAP Name Service Additional Schema
+# http://www.iana.org/assignments/gssapi-service-names
+#
+dn: cn=ldapns,cn=schema,cn=config
+objectClass: olcSchemaConfig
+cn: ldapns
+#
+olcAttributeTypes: ( 1.3.6.1.4.1.5322.17.2.1 NAME 'authorizedService'
+  DESC 'IANA GSS-API authorized service name'
+  EQUALITY caseIgnoreMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} )
+#
+olcObjectClasses: ( 1.3.6.1.4.1.5322.17.1.1 NAME 'authorizedServiceObject'
+  DESC 'Auxiliary object class for adding authorizedService attribute'
+  SUP top
+  AUXILIARY
+  MAY authorizedService )
+#
+olcObjectClasses: ( 1.3.6.1.4.1.5322.17.1.2 NAME 'hostObject'
+  DESC 'Auxiliary object class for adding host attribute'
+  SUP top
+  AUXILIARY
+  MAY host )
+EOF
+
+	[ $? -ne 0 ] && \
+		stderr "Error: Failed regist hostObject schem!" && \
+		exit 1
+fi
+
+# check Host objectClass
+check_user_attribute ${OPT_USERID} "objectClass" "hostObject"
+if [ $? -ne 0 ]; then
+	${cmd_cat} <<EOF | ${cmd_ldapmodify} ${LDAP_PRIV} >& /dev/null
+dn: uid=${OPT_USERID},${USER_SCHEME}
+changetype: modify
+add: objectClass
+objectClass: hostObject
+EOF
+	[ $? -ne 0 ] && \
+		stderr "Error: Failed add 'hostObject' object class!" && \
+		exit 1
+fi
+
+# check already regist
+check_user_attribute ${OPT_USERID} "host" '*'
+[ $? -eq 0 ] && \
+	stderr "Error: '${OPT_USERID}' already has access privileges about all host!\n" && exit 1
+
+check_user_attribute ${OPT_USERID} "host" "${OPT_HOST}"
+[ $? -eq 0 ] && \
+	stderr "Error: '${OPT_HOST}' is already regist!\n" && exit 1
+
+# add
+${cmd_cat} <<EOF | ${cmd_ldapmodify} ${LDAP_PRIV} >& /dev/null
+dn: uid=${OPT_USERID},${USER_SCHEME}
+changetype: modify
+add: host
+host: ${OPT_HOST}
+EOF
+
+[ $? -ne 0 ] && \
+	stderr "Error: Failed add host attrubute '${OPT_HOST}'!" && \
+	exit 1
+
+exit 0
+
+
+#
+# Local variables:
+# tab-width: 4
+# c-basic-offset: 4
+# End:
+# vim: set filetype=sh noet sw=4 ts=4 fdm=marker:
+# vim<600: noet sw=4 ts=4:
+#

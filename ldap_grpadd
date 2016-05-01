@@ -1,0 +1,205 @@
+#!/bin/bash
+
+# ldap_grpadd - add ldap group
+# Copyright (C) 2016  JoungKyun.Kim <http://oops.org>
+#
+# This file is part of ldap-auth-utils
+#
+# ldap-auth-utils is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# ldap-auth-utils is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+source "@datadir@/functions"
+
+help() {
+	stderr "ldap_grpadd: Add group to LDAP database\n"
+	stderr "Usage: ldap_grpadd [OPTIONS] GROUPNAME\n"
+	stderr "Options:\n"
+	stderr "    -g GID           group id [biggern than ${MIN_GID}\n"
+	stderr "    -d DESC          group description\n"
+	stderr "    -m MERBER_NAME   group member. enable multiple\n"
+	stderr "    -h               display this help message and exit\n"
+	stderr "\n"
+	stderr "GROUPNAME format\n"
+	stderr "    FROMAT : ACCOUNT@DOMAIN_NAME\n\n"
+	stderr "    if base dn of LDAP is \"dc=DOMAIN,dc=COM\", domain name is \"DOMAIN.COM\".\n"
+	stderr "\nExamples:\n"
+	stderr "    # add LDAP_GROUP with BASE DN 'dc=DOMAIN,dc=COM'\n"
+	stderr "    ldap_grpadd LDAP_GROUP@DOMAIN.COM\n\n"
+	stderr "    # add LDAP_GROUP with gid 10010\n"
+	stderr "    ldap_grpadd -g 10010 LDAP_GROUP@DOMAIN.COM\n\n"
+	stderr "    # add member of LDAP_GROUP@DOMAIN.COM\n"
+	stderr "    ldap_grpadd -m member1 -m member2 LDAP_GROUP\n"
+	exit 1
+}
+
+
+conf_context=$(LANG="C" ${cmd_sed} -n -f ${datadir}/config.sed ${confdir}/ldap-auth-utils.conf)
+eval ${conf_context}
+
+USER_DN=${USER_DN:=People}
+GROUP_DN=${GROUP_DN:=Group}
+
+OPT_GID=0
+OPT_MEMBERS=""
+OPT_DESC="LDAP GROUP"
+
+opts=$(${cmd_getopt} -u -n "$(${cmd_basename} "$0")" -o d:,g:,h,m: -- "$@")
+[ $? -ne 0 ] && help
+
+set -- ${opts}
+while true
+do
+	case "$1" in
+		-g) OPT_GID="$2"; shift ;;
+		-m) OPT_MEMBERS="${OPT_MEMBERS} $2";shift ;;
+		-d) OPT_DESC="$2";
+			shift
+
+			while true
+			do
+				echo $2 | ${cmd_grep} -v -- "^-[a-zA-Z]" >& /dev/null
+				RET=$?
+				[ ${RET} -eq 0 ] && OPT_DESC="${OPT_DESC} $2" && shift && continue
+				[ ${RET} -ne 0 ] && break
+			done
+
+			;;
+		-h) help ;;
+		--) shift; break;;
+	esac
+	shift
+done
+
+[ $# -ne 1 ] && help
+
+set_basedn_by_domain "$1"
+[ $? -ne 0 ] && \
+	stderr "Error: invalide GROUPNAME '${OPT_USERID}'\n" && help
+OPT_GRPNAME="${OPT_USERID}"
+
+USER_SCHEME="ou=${USER_DN},${BASEDN}"
+GROUP_SCHEME="ou=${GROUP_DN},${BASEDN}"
+
+if [ ${OPT_GID} -eq 0 ]; then
+	find_maxgid
+	OPT_GID=${RETVAL}
+elif [ ${OPT_GID} -lt ${MIN_GID} ]; then
+	stderr "Error: The value of -g option is bigger than ${MIN_UID}\n"
+	help
+fi
+
+${cmd_cat} <<EOF
+
+Your informations:
+
+    GROUP ID     : ${OPT_GRPNAME}
+    GROUP DESC   : ${OPT_DESC}
+    GID          : ${OPT_GID}
+    MEMBERS      : ${OPT_MEMBERS}
+
+EOF
+
+
+echo -n " * Check group entry for '${OPT_GRPNAME}' .. "
+
+check_group_exists ${OPT_GRPNAME}
+RET=$?
+
+[ -z "${OPT_MEMBERS}" -a ${RET} -eq 0 ] && failure "already exists" && echo && exit 1
+
+[ ${RET} -eq 0 ] && success "exsit" || failure "will create"
+echo
+
+if [ ${RET} -ne 0 ]; then
+
+	if [ -n "${OPT_MEMBERS}" ]; then
+		for member in ${OPT_MEMBERS}
+		do
+			echo -n " * check additional member '${member}' .. "
+			check_user_exists ${member}
+			[ $? -ne 0 ] && failure "no exists. skip!" && echo && continue
+
+			success; echo
+			OPT_ADD_MEM="${OPT_ADD_MEM}
+memberUid: ${member}"
+		done
+	fi
+
+	echo -n " * Create ${OPT_GRPNAME} group entry .. "
+
+	#echo; echo ; ${cmd_cat} <<EOF | ${cmd_grep} -v '^$'
+	${cmd_cat} <<EOF | ${cmd_grep} -v '^$' | ${cmd_ldapadd} -a -c ${LDAP_PRIV} >& /dev/null
+dn: cn=${OPT_GRPNAME},${GROUP_SCHEME}
+objectClass: posixGroup
+objectClass: top
+cn: ${OPT_GRPNAME}
+description: ${OPT_DESC}
+gidNumber: ${OPT_GID}
+${OPT_ADD_MEM}
+EOF
+
+	[ $? -eq 0 ] && success || failure
+	echo
+else
+
+	if [ -n "${OPT_MEMBERS}" ]; then
+		for member in ${OPT_MEMBERS}
+		do
+			echo -n " * check additional member '${member}' .. "
+			check_user_exists ${member}
+			[ $? -ne 0 ] && failure "no exists. skip!" && echo && continue
+
+			#
+			# 등록한 member가 이미 등록 되어 있는지 확인 필요
+			#
+			check_group_member "${OPT_GRPNAME}" "${member}"
+			[ $? -eq 0 ] && failure "already exists. skip" && echo && continue
+
+			success; echo
+			OPT_ADD_MEM="${OPT_ADD_MEM}
+memberUid: ${member}"
+		done
+	fi
+
+	[ -z "${OPT_ADD_MEM}" ] && \
+		echo " * No additional about memberUID attribute and exit this program" && \
+		exit 1
+
+	echo -n " * Add additional member on ${OPT_GRPNAME} .. "
+
+	#echo; echo ; ${cmd_cat} <<EOF | ${cmd_grep} -v '^$'
+	${cmd_cat} <<EOF | ${cmd_grep} -v '^$' | ${cmd_ldapmodify} ${LDAP_PRIV} >& /dev/null
+dn: cn=${OPT_GRPNAME},${GROUP_SCHEME}
+changetype: modify
+add: memberUid
+${OPT_ADD_MEM}
+EOF
+
+	[ $? -eq 0 ] && success || failure
+	echo
+fi	
+
+
+
+exit
+
+
+#
+# Local variables:
+# tab-width: 4
+# c-basic-offset: 4
+# End:
+# vim: set filetype=sh noet sw=4 ts=4 fdm=marker:
+# vim<600: noet sw=4 ts=4:
+#

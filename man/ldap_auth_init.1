@@ -1,0 +1,61 @@
+.TH LDAP_AUTH_INIT 1 "29 Apr 2016"
+.
+.SH NAME
+.hy 0
+.
+.BI ldap_auth_init
+\- initionalize the ldap authentification structure
+.
+.SH SYNOPSIS
+.B ldap_auth_init
+.
+.SH DESCRIPTION
+ldap_auth_init initionalize the ldap authentification strucure. Default OU that is created by ldap_auth_init is Admin, Group, People.
+.SS Admin OU
+Admin OU have user and group entries that manages ldap service.
+.B
+.IP ldapadmins
+The members of ladpadmins group have managed privileges.
+.B
+.IP ldapmanagers
+Default group of user entries on Admin OU. This group has not any special privileges.
+.B
+.IP ldapROusers
+The members of ldapROusers group have read only privileges on whole ldap databases.
+.B
+.IP replica
+User entry for replication. replica user entry is member of ldapROusers group.
+.B
+.IP ssoadmin
+User entry for management. ssoadmin user entry is member of ldapadmins group.
+.B
+.IP ssomanager
+For authentification integration. This user entry is member of ldapROusers group.
+.SS Group OU
+This OU has group entries. ldapusers group entry is default, and this is used
+to default ldap gruop.
+.SS People OU
+This OU has group entries. 
+.
+.SH COPYRIGHT
+Copyright 2016 JoungKyun.Kim
+.PP
+This is free software;
+see the source for copying conditions.
+There is NO warranty;
+not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+.
+.SH BUGS
+bug tracker is located at <https://github.com/Joungkyun/ldap-auth-utils/issues>.
+.
+.SH "SEE ALSO"
+.BR ldap-auth-utils.conf(5),
+.BR ldap_auth(1),
+.BR ldap_ssl(1),
+.BR ldap_grpadd(1),
+.BR ldap_grpdel(1),
+.BR ldap_host_manage(1),
+.BR ldap_passwd(1),
+.BR ldap_replica(1),
+.BR ldap_useradd(1),
+.BR ldap_userdel(1)

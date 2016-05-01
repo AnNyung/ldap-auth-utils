@@ -1,0 +1,129 @@
+.TH LDAP-AUTH-UTILS.CONF 5 "29 Apr 2016"
+.
+.SH NAME
+.hy 0
+.
+.BI ldap-auth-utils.conf
+\- ldap-auth-utils configuration file/environment variables
+.
+.SH SYNOPSIS
+/etc/openldap/ldap-auth-utils.conf
+.
+.SH DESCRIPTION
+ldap-auth-utils.conf have the environment variable to be used in the ldap-auth-utils.
+.
+.SH OPTIONS
+.SS Ldap connection configuration:
+.TP
+.BI LDAP_PRIV
+The value of connection option for ldap server. Default value is
+.B "-Y EXTERNAL",
+and this means that connect to localhost with UID 0 privileges. If you want to connect
+remote ldap server, do set follows:
+
+.B LDAP_PRIV
+= -d "cn=manager,dc=domain,dc=com" -w "password" ldaps://remote.domain.com/
+.TP
+.BI USER_DN
+Organization Unit(OU) name for authenticate user entry. Default value is
+.BI 'People'.
+.TP
+.BI GROUP_DN
+Organization Unit(OU) name for authenticate group entry. Default value is
+.BI 'Group'.
+.
+.SS Account default informations:
+These options are used by ldap_useradd.
+.TP
+.BI OPT_GID
+Default GID. Default value is 
+.BI 10000.
+.TP
+.BI OPT_SHELL
+Default SHELL. Default value is
+.BI '/bin/bash'
+.TP
+.BI OPT_HOME_PREFIX
+Set home directory with this option. Default value is
+.BI '/home/ldapusers'
+and the path of real home directory is
+expanded to /home/ldapusers/__USERNAME__.
+.TP
+.BI OPT_GECOS
+Default GECOS. Default value is
+.B 'LDAP Users'
+.TP
+.BI OPT_GROUPS
+Default group member. During the account registration, register the account
+to the member of a particular group. Use the white space, you can specify
+more than one.
+.TP
+.BI MIN_UID
+Minimum UID value to be used in the LDAP
+.TP
+.BI MIN_GID
+Minimum GID value to be used in the LDAP
+.TP
+.BI OPT_HOSTS
+Register the host to allow access with the FQDN. Use the white space, you
+can specify more than one. To grant access to all of the hosts, please register
+the "
+.BI *
+".
+.
+.SS Password configuration:
+.TP
+.BI PASSWD_MECH
+It specifies the encryption method. It supports md5, sha256, sha512. Default value is
+.BI sha512.
+
+As of RHEL 5, if there is a host that does not support sha512, please specify the md5
+for compatibility. From RHEL 6, it supports sha512.
+.TP
+.BI PASS_MAX_DAYS
+Maximum number of days a password may be used. If the value is not specified, the value
+that is set to
+.BI /etc/login.defs
+will be used.
+.TP
+.BI PASS_MIN_DAYS
+Minimum number of days allowed between password changes. If the value is not specified,
+the value that is set to
+.BI /etc/login.defs
+will be used.
+.TP
+.BI PASS_WARN_AGE
+Number of days warning given before a password expires. If the value is not specified,
+the value that is set to
+.BI /etc/login.defs
+will be used.
+.TP
+.BI PASS_MINLEN
+The minimum length of password
+.TP
+.BI PASS_CLASSES
+Setting of the complexity of the password. Number of the character classes. Character
+class is upper case and lower case letters, numbers and special characters.
+.
+.SH COPYRIGHT
+Copyright 2016 JoungKyun.Kim
+.PP
+This is free software;
+see the source for copying conditions.
+There is NO warranty;
+not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+.
+.SH BUGS
+bug tracker is located at <https://github.com/Joungkyun/ldap-auth-utils/issues>.
+.
+.SH "SEE ALSO"
+.BR ldap_auth(1),
+.BR ldap_auth_init(1),
+.BR ldap_ssl(1),
+.BR ldap_grpadd(1),
+.BR ldap_grpdel(1),
+.BR ldap_host_manage(1),
+.BR ldap_passwd(1),
+.BR ldap_replica(1),
+.BR ldap_useradd(1),
+.BR ldap_userdel(1)

@@ -1,0 +1,19 @@
+INSTALL         = @INSTALL@
+MKDIR           = @MKDIR_P@
+
+prefix          = @prefix@
+datarootdir     = @datarootdir@
+exec_prefix     = @exec_prefix@
+datadir         = @datadir@
+mandir          = @mandir@
+
+install:
+	$(MKDIR) $(DESTDIR)$(mandir)/{man1,man5}
+
+	for i in `ls *.1` ; do \
+		$(INSTALL) -m 755 $$i $(DESTDIR)$(mandir)/man1/ ; \
+	done
+
+	for i in `ls *.5` ; do \
+		$(INSTALL) -m 755 $$i $(DESTDIR)$(mandir)/man5/ ; \
+	done

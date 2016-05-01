@@ -1,0 +1,82 @@
+.TH LDAP_AUTH 1 "29 Apr 2016"
+.
+.SH NAME
+.hy 0
+.
+.BI ldap_auth
+\- management user/group entry on ldap authetificate database
+.
+.SH SYNOPSIS
+.B ldap_auth
+[OPTION] {ACCOUNT FORMAT} {ENTRY} {MODIFED_ENTRY_VALUE}
+
+.B {ACCOUNT FROMAT}
+.IP
+# uid=user,ou=People,dc=domain,dc=com
+.br
+.BI user@domian.com
+.sp
+# cn=group,ou=Group,dc=domain,dc=com
+.br
+.BI group@domian.com
+.
+.SH DESCRIPTION
+ldap_auth is management tool that manages user and group entry on LDAP.
+
+.TP
+Show the user informantion:
+.B ldap_auth
+-u user@domain.com
+.TP
+Show the group information:
+.B ldap_auth
+-g group@domain.com
+.TP
+Set tha value of shaodwMax attributes to 9999 on user@domain.com entry:
+.B ldap_auth
+-u user@domain.com shadowMax 9999
+.TP
+Remove tha value of shaodwMax attributes on user@domain.com entry:
+.B ldap_auth
+-u user@domain.com shadowMax
+.PP
+This is used many environment variables in ldap-auth-utils.conf(5). See also
+.B 'man 5 ldap-auth-utils.conf'
+.
+.SH OPTIONS
+.IP -d
+permit modify duplicated uidNumber/gidNumber
+.IP -g
+searching group
+.IP -h
+display help message and exit
+.IP -u
+searching account [default option]
+.IP -y
+None intercative mode
+.
+.SH "EXIT STATUS"
+Normally, the exit status is 0 if no errors, and 1 otherwise.
+.
+.SH COPYRIGHT
+Copyright 2016 JoungKyun.Kim
+.PP
+This is free software;
+see the source for copying conditions.
+There is NO warranty;
+not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+.
+.SH BUGS
+bug tracker is located at <https://github.com/Joungkyun/ldap-auth-utils/issues>.
+.
+.SH "SEE ALSO"
+.BR ldap-auth-utils.conf(5),
+.BR ldap_auth_init(1),
+.BR ldap_ssl(1),
+.BR ldap_grpadd(1),
+.BR ldap_grpdel(1),
+.BR ldap_host_manage(1),
+.BR ldap_passwd(1),
+.BR ldap_replica(1),
+.BR ldap_useradd(1),
+.BR ldap_userdel(1)

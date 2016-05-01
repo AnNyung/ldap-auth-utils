@@ -1,0 +1,61 @@
+.TH LDAP_USERDEL 1 "29 Apr 2016"
+.
+.SH NAME
+.hy 0
+.
+.BI ldap_userdel
+\- remove ldap user
+.
+.SH SYNOPSIS
+.B ldap_userdel
+[OPTION] {ACCOUNT FORMAT}
+
+.B {ACCOUNT FROMAT}
+.IP
+# uid=user,ou=People,dc=domain,dc=com
+.br
+.BI user@domian.com
+.sp
+.
+.SH DESCRIPTION
+ldap_userdel is remove ldap user
+
+.TP
+remove LDAP_USER with BASE DN 'dc=DOMAIN,dc=COM':
+.B ldap_userdel
+LDAP_USER@DOMAIN.COM
+.PP
+This is used many environment variables in ldap-auth-utils.conf(5). See also
+.B 'man 5 ldap-auth-utils.conf'
+.
+.SH OPTIONS
+.IP -h
+display help message and exit
+.IP -y
+None intercative mode.The default is interactive mode.
+.
+.SH "EXIT STATUS"
+Normally, the exit status is 0 if no errors, and 1 otherwise.
+.
+.SH COPYRIGHT
+Copyright 2016 JoungKyun.Kim
+.PP
+This is free software;
+see the source for copying conditions.
+There is NO warranty;
+not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+.
+.SH BUGS
+bug tracker is located at <https://github.com/Joungkyun/ldap-auth-utils/issues>.
+.
+.SH "SEE ALSO"
+.BR ldap-auth-utils.conf(5),
+.BR ldap_auth_init(1),
+.BR ldap_auth(1),
+.BR ldap_ssl(1),
+.BR ldap_grpadd(1),
+.BR ldap_grpdel(1)
+.BR ldap_host_manage(1),
+.BR ldap_passwd(1),
+.BR ldap_replica(1),
+.BR ldap_useradd(1),

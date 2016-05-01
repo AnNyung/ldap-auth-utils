@@ -1,0 +1,208 @@
+#!/bin/bash
+
+# ldap_auth - managed ldap user or group
+# Copyright (C) 2016  JoungKyun.Kim <http://oops.org>
+#
+# This file is part of ldap-auth-utils
+#
+# ldap-auth-utils is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# ldap-auth-utils is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+source "@datadir@/functions"
+
+help() {
+	stderr "ldap_auth: managed user or group attributes\n"
+	stderr "Usage: ldap_auth [OPTIONS] {USER|GROUP}@DOMAIN.COM[ ENTRY MODIFIED_ENTRY_VALUE]\n"
+	stderr "Options:\n"
+	stderr "    -d               permit modify duplicated uidNumber/gidNumber\n"
+	stderr "    -g               searching group\n"
+	stderr "    -h               display this help message and exit\n"
+	stderr "    -u               searching account [default option]\n"
+	stderr "    -y               None intercative mode\n\n"
+	stderr "\nExamples:\n"
+	stderr "    # View information LDAP_USER with BASE DN 'dc=DOMAIN,dc=COM'\n"
+	stderr "    ldap_auth -u LDAP_USER@DOMAIN.COM\n\n"
+	stderr "    # View information LDAP_GROUP with BASE DN 'dc=DOMAIN,dc=COM\n"
+	stderr "    ldap_auth -g LDAP_GROUP@DOMAIN.COM\n\n"
+	stderr "    # set or modify attribute on LDAP_USER with BASE DN 'dc=DOMAIN,dc=COM'\n"
+	stderr "    ldap_auth -u LDAP_USER@DOMAIN.COM shadowMax 99999\n\n"
+	stderr "    # remove attribute on LDAP_USER with BASE DN 'dc=DOMAIN,dc=COM'\n"
+	stderr "    ldap_auth -u LDAP_USER@DOMAIN.COM shadowMax\n"
+	exit 1
+}
+
+
+conf_context=$(LANG="C" ${cmd_sed} -n -f ${datadir}/config.sed ${confdir}/ldap-auth-utils.conf)
+eval ${conf_context}
+
+USER_DN=${USER_DN:=People}
+GROUP_DN=${GROUP_DN:=Group}
+MIN_UID=${MIN_UID:=10000}
+MIN_GID=${MIN_GID:=10000}
+
+
+# searching user
+OPT_MODE=0
+OPT_INT=0
+OPT_DUP=0
+
+opts=$(${cmd_getopt} -u -n "$(${cmd_basename} "$0")" -o d,g,h,u,y -- "$@")
+[ $? -ne 0 ] && help
+
+set -- ${opts}
+while true
+do
+	case "$1" in
+		-d) OPT_DUP=1 ;;
+		-g) OPT_MODE=1 ;;
+		-h) help ;;
+		-u) OPT_MODE=0 ;;
+		-y) OPT_INT=1 ;;
+		--) shift; break;;
+	esac
+	shift
+done
+
+[ $# -lt 1 ] && help
+
+OPT_USERID="$1"
+set_basedn_by_domain "${OPT_USERID}"
+[ $? -ne 0 ] && \
+	stderr "Error: invalide USERNAME '${OPT_USERID}'\n" && help
+
+USER_SCHEME="ou=${USER_DN},${BASEDN}"
+GROUP_SCHEME="ou=${GROUP_DN},${BASEDN}"
+
+if [ ${OPT_MODE} -eq 0 ]; then
+	SEARCH_DN="${USER_SCHEME}"
+	FILTERS="(uid=${OPT_USERID})"
+else
+	SEARCH_DN="${GROUP_SCHEME}"
+	FILTERS="(cn=${OPT_USERID})"
+fi
+
+#
+# user/group check
+#
+BUF="$(${cmd_ldapsearch} ${LDAB_PRIV} -b "${SEARCH_DN}"  "${FILTERS}" 2> /dev/null)"
+echo "${BUF}" | ${cmd_grep} "# numEntries: " >& /dev/null
+
+if [ $? -ne 0 ]; then
+	stderr "Error: Can't found '${OPT_USERID}@${OPT_DOMAIN}' entry\n"
+	exit 1
+fi
+
+#
+# View information
+#
+
+if [ $# -eq 1 ] ;then
+	echo
+	echo "${BUF}" | ldap_decrypt_hash | ${cmd_sed} "s/^/    /g"
+	echo
+
+	exit 0
+fi
+
+#
+# Edit mode
+#
+OPT_DN="$2"
+shift; shift
+OPT_DNV="$*"
+
+# DN list that can not modify
+blockdn=':objectClass:dn:uid:cn:shadowLastChange:userPassword:'
+echo "${blockdn}" | ${cmd_grep} ":${OPT_DN}:" >& /dev/null
+[ $? -eq 0 ] && stderr "Error: '${OPT_DN}' attribute can not be modified!!\n" && exit 1
+
+if [ ${OPT_MODE} -eq 0 ]; then
+	blockdn=":host:"
+	errmsg="Use ldap_host_manage command"
+else
+	blockdn=":memberUid:"
+	errmsg="Use ldap_grpadd -m or ldap_grpdel -m"
+fi
+echo "${blockdn}" | ${cmd_grep} ":${OPT_DN}:" >& /dev/null
+[ $? -eq 0 ] && \
+	stderr "Error: '${OPT_DN}' attribute can not be managed!!\n" && \
+	stderr "        ${errmsg}\n" && exit 1
+
+[ -z "${OPT_DNV}" ] && \
+	stderr "Error: invalid '${OPT_DN}' values!\n" && exit 1
+
+${cmd_cat} <<EOF
+
+Your inforamtions:
+
+  * DN           : ${OPT_USERID}@${OPT_DOMAIN}
+  * OU           : ${SEARCH_DN}
+  * Change Attr  : ${OPT_DN}
+  * Change Value : ${OPT_DNV}
+
+EOF
+
+if [ ${OPT_INT} -eq 0 ]; then
+	prompt_def 'N' "Is right upper informations? [Y/${srYELLOW}N${sEND}] "
+	prompt_value="$(upper ${prompt_value})"
+	[ "${prompt_value}" != "Y" ] && exit 0
+fi
+
+if [ ${OPT_MODE} -eq 0 ]; then
+	RDN="uid=${OPT_USERID},${SEARCH_DN}"
+	check_user_attribute "${OPT_USERID}" "${OPT_DN}"
+else
+	RDN="cn=${OPT_USERID},${SEARCH_DN}"
+	check_group_attribute "${OPT_USERID}" "${OPT_DN}"
+fi
+[ $? -eq 1 ] && stderr "Error: Can't found ${OPT_DN} attribute\n" && exit 1
+
+UOPT_DN=$(upper ${OPT_DN})
+if [ "${UOPT_DN}" = "GIDNUMBER" -o "${UOPT_DN}" = "UIDNUMBER" ]; then
+	[ "${UOPT_DN}" = "UIDNUMBER" ] && OPT_CHK=${MIN_UID} || OPT_CHK=${MIN_GID}
+	[ ${OPT_DNV} -lt ${OPT_CHK} ] && \
+		stderr "Error: '${OPT_DN}' attribute is bigger than ${OPT_CHK}\n" && \
+		exit 1
+
+	if [ "${UOPT_DN}" = "UIDNUMBER" ]; then
+		check_uid_exists ${OPT_DNV}
+		RET=$?
+	else
+		check_gid_exists ${OPT_DNV}
+		RET=$?
+	fi
+
+	[ ${RET} -eq 0 -a ${OPT_DUP} -eq 0 ] && \
+		stderr "Errot: '${OPT_DN}' ${OPT_DNV} is duplicaed!\n" && \
+		stderr "       If you want to this value, use -d option\n" && exit 1
+fi
+
+
+${cmd_cat} <<EOF | ${cmd_ldapmodify} ${LDAB_PRIV} >& /dev/null
+dn: ${RDN}
+changetype: modify
+replace: ${OPT_DN}
+${OPT_DN}: ${OPT_DNV}
+EOF
+
+exit $?
+
+#
+# Local variables:
+# tab-width: 4
+# c-basic-offset: 4
+# End:
+# vim: set filetype=sh noet sw=4 ts=4 fdm=marker:
+# vim<600: noet sw=4 ts=4:
+#

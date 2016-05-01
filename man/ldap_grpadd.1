@@ -1,0 +1,73 @@
+.TH LDAP_GRPADD 1 "29 Apr 2016"
+.
+.SH NAME
+.hy 0
+.
+.BI ldap_grpadd
+\- add ldap group
+.
+.SH SYNOPSIS
+.B ldap_grpadd
+[OPTION] {GROUP FORMAT}
+
+.B {GROUP FROMAT}
+.IP
+# cn=gruop,ou=Group,dc=domain,dc=com
+.br
+.BI group@domian.com
+.sp
+.
+.SH DESCRIPTION
+ldap_grpadd is add ldap group on ldap group entries
+
+.TP
+add LDAP_GROUP with BASE DN 'dc=DOMAIN,dc=COM':
+.B ldap_grpadd
+LDAP_GROUP@DOMAIN.COM
+.TP
+add LDAP_GROUP with gid 10010:
+.B ldap_grpadd
+-g 10010 LDAP_GROUP@DOMAIN.COM
+.TP
+add member of LDAP_GROUP@DOMAIN.COM:
+.B ldap_grpadd
+-m member1 -m member2 LDAP_GROUP
+.PP
+This is used many environment variables in ldap-auth-utils.conf(5). See also
+.B 'man 5 ldap-auth-utils.conf'
+.
+.SH OPTIONS
+.IP -d
+group description
+.IP -g
+Group ID. Group ID is bigger than 10000.
+.IP -h
+display help message and exit
+.IP -m
+Set group member. It is possible to use several times.
+.
+.SH "EXIT STATUS"
+Normally, the exit status is 0 if no errors, and 1 otherwise.
+.
+.SH COPYRIGHT
+Copyright 2016 JoungKyun.Kim
+.PP
+This is free software;
+see the source for copying conditions.
+There is NO warranty;
+not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+.
+.SH BUGS
+bug tracker is located at <https://github.com/Joungkyun/ldap-auth-utils/issues>.
+.
+.SH "SEE ALSO"
+.BR ldap-auth-utils.conf(5),
+.BR ldap_auth_init(1),
+.BR ldap_auth(1),
+.BR ldap_ssl(1),
+.BR ldap_grpdel(1),
+.BR ldap_host_manage(1),
+.BR ldap_passwd(1),
+.BR ldap_replica(1),
+.BR ldap_useradd(1),
+.BR ldap_userdel(1)

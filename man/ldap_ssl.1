@@ -1,0 +1,74 @@
+.TH LDAP_SSL 1 "29 Apr 2016"
+.
+.SH NAME
+.hy 0
+.
+.BI ldap_ssl
+\- generate certificate and management ldap tls configuration
+.
+.SH SYNOPSIS
+.B ldap_ssl
+[OPTION]
+.
+.SH DESCRIPTION
+ldap_ssl is management tool that manages TLS configuration and
+creates certificates
+.TP
+Create SSL cerfiticate:
+.B ldap_ssl
+-c
+.TP
+Add TLS configurations
+.B ldap_ssl
+-a -p /etc/openldap/certs/pki/ldap.crt -k /etc/openldap/certs/pki/ldap.key
+.TP
+Remove TLS configuration:
+.B ldap_ssl
+-r
+.PP
+This is used many environment variables in ldap-auth-utils.conf(5). See also
+.B 'man 5 ldap-auth-utils.conf'
+.
+.SH OPTIONS
+.IP -C
+assign the path of CA certicate. The default value is
+/etc/pki/tls/certs/ca-bundle.crt. This option is used with -c option.
+.IP -a
+set ssl configuration on sldapd
+.IP -c
+create private key and self signed server certificate. The other options
+are ignored.
+.IP -h
+display help message and exit
+.IP -p
+private key
+.IP -r
+remove ssl configuration on slapd
+.IP -s
+server certicate
+.
+.SH "EXIT STATUS"
+Normally, the exit status is 0 if no errors, and 1 otherwise.
+.
+.SH COPYRIGHT
+Copyright 2016 JoungKyun.Kim
+.PP
+This is free software;
+see the source for copying conditions.
+There is NO warranty;
+not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+.
+.SH BUGS
+bug tracker is located at <https://github.com/Joungkyun/ldap-auth-utils/issues>.
+.
+.SH "SEE ALSO"
+.BR ldap-auth-utils.conf(5),
+.BR ldap_auth(1),
+.BR ldap_auth_init(1),
+.BR ldap_grpadd(1),
+.BR ldap_grpdel(1),
+.BR ldap_host_manage(1),
+.BR ldap_passwd(1),
+.BR ldap_replica(1),
+.BR ldap_useradd(1),
+.BR ldap_userdel(1)

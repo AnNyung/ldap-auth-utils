@@ -1,0 +1,135 @@
+#!/bin/bash
+
+# ldap_userdel - remove ldap user
+# Copyright (C) 2016  JoungKyun.Kim <http://oops.org>
+#
+# This file is part of ldap-auth-utils
+#
+# ldap-auth-utils is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# ldap-auth-utils is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+source "@datadir@/functions"
+
+help() {
+	stderr "ldap_userdel: Remove user on LDAP database\n"
+	stderr "Usage: ldap_userdel [OPTIONS] USERNAME ...\n"
+	stderr "Options:\n"
+	stderr "    -y               None intercative mode [default: interactive mode]\n"
+	stderr "\n"
+	stderr "USERNAME format\n"
+	stderr "    FROMAT : ACCOUNT@DOMAIN_NAME\n\n"
+	stderr "    if base dn of LDAP is \"dc=DOMAIN,dc=COM\", domain name is \"DOMAIN.COM\".\n"
+	stderr "\nExamples:\n"
+	stderr "    # remove LDAP_USER with BASE DN 'dc=DOMAIN,dc=COM'\n"
+	stderr "    ldap_userdel LDAP_USER@DOMAIN.COM\n\n"
+	exit 1
+}
+
+
+conf_context=$(LANG="C" ${cmd_sed} -n -f ${datadir}/config.sed ${confdir}/ldap-auth-utils.conf)
+eval ${conf_context}
+
+USER_DN=${USER_DN:=People}
+GROUP_DN=${GROUP_DN:=Group}
+
+OPT_INT=0
+
+opts=$(${cmd_getopt} -u -n "$(${cmd_basename} "$0")" -o y -- "$@")
+[ $? -ne 0 ] && help
+
+set -- ${opts}
+while true
+do
+	case "$1" in
+		-y) OPT_INT=-1 ;;
+		--) shift; break;;
+	esac
+	shift
+done
+
+[ $# -eq 0 ] && help
+OPT_RM_USERS="$*"
+
+
+for userid in $OPT_RM_USERS
+do
+	if [ ${OPT_INT} -eq 0 ]; then
+		prompt_def N "  * Do you want to remove '${userid}' account ? [yes/${srYELLOW}no${sEND}] "
+		prompt_value=$(upper "${prompt_value}")
+	else
+		prompt_value="YES"
+	fi
+
+	[ "${prompt_value}" != "YES" ] && continue;
+
+	printf "    * Remove account %-30s ... " "${userid}"
+
+	set_basedn_by_domain "${userid}"
+	[ $? -ne 0 ] && failure && echo && \
+		stderr "      Error: invalide USERNAME '${userid}'\n" && \
+		continue
+
+	USER_SCHEME="ou=${USER_DN},${BASEDN}"
+	GROUP_SCHEME="ou=${GROUP_DN},${BASEDN}"
+
+	check_user_exists ${userid}
+	[ $? -eq 1 ] && failure && echo && \
+		stderr "      Error: '${userid}' account is not found!!!\n\n" && \
+		continue
+
+	get_uid ${userid}
+	uid=${RETVAL}
+
+	[ ${uid} -lt ${MIN_UID} ] && failure && echo && \
+		stderr "      Error: The uid of '${userid}' account is ${uid}\n" && \
+		stderr "             This program can not control that is smaller than ${MIN_UID}\n\n" && \
+		continue
+
+	# first, remove memberUid of group
+	get_member_of_uid ${userid}
+
+	for rdn in ${RETVAL}
+	do
+		${cmd_ldapmodify} ${LDAP_PRIV} <<EOF >& /dev/null
+dn: ${rdn}
+changetype: modify
+delete: memberUid
+memberUid: ${userid}
+EOF
+
+		[ $? -ne  0 ] && failure && echo && \
+			stderr "      Error: failed remove additional group\n" && \
+			stderr "             confirm memberUid of ${rdn}\n" && \
+			stderr "             skip remove ${userid} account\n\n" && \
+			continue 2
+	done
+	
+	# And, remove account
+
+	REMOVE_DN="uid=${userid},${USER_SCHEME}"
+	${cmd_ldapdelete} ${LDAP_PRIV} "${REMOVE_DN}" >& /dev/null
+
+	[ $? -eq 0 ] && success || failure
+	echo
+done
+
+
+#
+# Local variables:
+# tab-width: 4
+# c-basic-offset: 4
+# End:
+# vim: set filetype=sh noet sw=4 ts=4 fdm=marker:
+# vim<600: noet sw=4 ts=4:
+#

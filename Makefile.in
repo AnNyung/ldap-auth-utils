@@ -1,0 +1,54 @@
+PROG            = @PACKAGE_NAME@
+VERSION         = @PACKAGE_VERSION@
+DESTDIR         =
+
+prefix          = @prefix@
+exec_prefix     = @exec_prefix@
+datarootdir     = @datarootdir@
+datadir         = @datadir@
+includedir      = @includedir@
+bindir          = @bindir@
+sbindir         = @sbindir@
+sysconfdir      = @sysconfdir@
+
+INSTALL         = @INSTALL@
+GREP            = @GREP@
+SED             = @SED@
+RM              = @RM@ -f
+MKDIR           = @MKDIR_P@
+AWK             = @AWK@
+MAKE            = @MAKE@
+
+WORKDIR         = workdir
+installlog      = $(WORKDIR)/install.log
+
+sbinlist        = ldap_auth ldap_auth_init ldap_grpadd ldap_grpdel ldap_host_manage ldap_useradd ldap_userdel ldap_passwd ldap_ssl ldap_replica
+
+all:
+	$(MKDIR) -p $(WORKDIR)
+
+	for i in $(sbinlist) ; do \
+		$(SED) -e "s!@1\?datadir@!$(datadir)/ldap-auth-utils!g" $$i > $(WORKDIR)/$$i ; \
+	done
+
+install: install-man
+	$(MKDIR) $(DESTDIR)$(sbindir)
+	$(MKDIR) $(DESTDIR)$(sysconfdir)
+	$(MKDIR) $(DESTDIR)$(datadir)/ldap-auth-utils
+
+	for i in $(sbinlist) ; do \
+		$(INSTALL) -m 755 $(WORKDIR)/$$i $(DESTDIR)$(sbindir) ; \
+	done
+
+	$(INSTALL) -m 600 ldap-auth-utils.conf $(DESTDIR)$(sysconfdir)/ldap-auth-utils.conf;
+	$(INSTALL) -m 644 functions $(DESTDIR)$(datadir)/ldap-auth-utils/functions;
+	$(INSTALL) -m 644 config.sed $(DESTDIR)$(datadir)/ldap-auth-utils/config.sed;
+
+install-man:
+	$(MAKE) -C man
+
+clean:
+	$(RM) -rf $(WORKDIR) config.log config.status
+
+distclean: clean
+	$(RM) -rf Makefile config.h functions *~ autom4te.cache

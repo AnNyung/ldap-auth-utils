@@ -1,0 +1,237 @@
+#!/bin/bash
+
+# ldap_ssl - managed ldap ssl configuration
+# Copyright (C) 2016  JoungKyun.Kim <http://oops.org>
+#
+# This file is part of ldap-auth-utils
+#
+# ldap-auth-utils is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# ldap-auth-utils is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+source "@datadir@/functions"
+
+help() {
+	stderr "ldap_ssl: management ssl on ldap server\n"
+	stderr "Usage: ldap_ssl [OPTIONS]\n"
+	stderr "Options:\n"
+	stderr "    -C PATH          ca certicate [default: /etc/pki/tls/certs/ca-bundle.crt]\n"
+	stderr "    -a               add ssl configuration on this server\n"
+	stderr "    -c               create private key and self signed server certificate\n"
+	stderr "                     other options are ignored\n"
+	stderr "    -r               remove ssl configuration on this server\n"
+	stderr "    -p PATH          private key\n"
+	stderr "    -s PATH          server certicate\n"
+	exit 1
+}
+
+
+conf_context=$(LANG="C" ${cmd_sed} -n -f ${datadir}/config.sed ${confdir}/ldap-auth-utils.conf)
+eval ${conf_context}
+
+OPT_MODE=""
+OPT_PKEY="/etc/openldap/certs/pki/ldap.key"
+OPT_SCSR="/etc/openldap/certs/pki/ldap.csr"
+OPT_SCRT="/etc/openldap/certs/pki/ldap.crt"
+OPT_CKEY="/etc/pki/tls/certs/ca-bundle.crt"
+
+opts=$(${cmd_getopt} -u -n "$(${cmd_basename} "$0")" -o C:,a,c,h,p:,r,s: -- "$@")
+[ $? -ne 0 ] && help
+
+set -- ${opts}
+while true
+do
+	case "$1" in
+		-C) OPT_CKEY=$2; shift ;;
+		-a)
+			[ -n "${OPT_MODE}" ] && stderr "Error: The options -a, -c, -r can't use combination\n" && exit 1
+			OPT_MODE="add"
+			;;
+		-c)
+			[ -n "${OPT_MODE}" ] && stderr "Error: The options -a, -c, -r can't use combination\n" && exit 1
+			OPT_MODE="create";
+			;;
+		-h) help ;;
+		-p) OPT_PKEY=$2; shift ;;
+		-s) OPT_SCRT=$2; shift ;;
+		-r)
+			[ -n "${OPT_MODE}" ] && stderr "Error: The options -a, -c, -r can't use combination\n" && exit 1
+			OPT_MODE="rem"
+			;;
+		--) shift; break;;
+	esac
+	shift
+done
+
+[ $# -ne 0 ] && help
+
+[ ! -d "/etc/openldap/certs/pki" ] && mkdir -p "/etc/openldap/certs/pki"
+
+I=1
+if [ "${OPT_MODE}" = "create" ]; then
+
+	printf "* %d. " "${I}"
+	success "Make private key"
+	let I++
+
+	if [ ! -f "${OPT_PKEY}" ]; then
+		echo; echo
+
+		${cmd_openssl} genrsa -aes128 -passout pass:asdf > ${OPT_PKEY}
+
+		[ $? -ne 0 ] && \
+			echo -n "${OPT_PKEY} create .. " && failure && rm -f ${OPT_PKEY} && echo && exit 1
+
+		${cmd_openssl} rsa -in ${OPT_PKEY} -passin pass:asdf -out ${OPT_PKEY}
+
+		[ $? -ne 0 ] &&
+			echo -n "Remove password on ${OPT_PKEY} .. " && failure && rm -f ${OPT_PKEY} && echo && exit 1
+
+		success "Success" ; echo " create ${OPT_PKEY}"
+		echo
+		echo
+	else
+		echo -n " .. ${OPT_PKEY} "
+		success "already exsist"
+		echo;
+	fi
+
+	printf "* %d. " "${I}"
+	success "Make Server key";
+	let I++
+	if [ ! -f "${OPT_SCRT}" ]; then
+		echo; echo
+
+		if [ ! -f "${OPT_SCSR}" ]; then
+			${cmd_openssl} req -utf8 -new -key ${OPT_PKEY} -out ${OPT_SCSR}
+
+			[ $? -ne 0 ] && \
+				echo -n "${OPT_PKEY} create .. " && failure && rm -f ${OPT_SCSR} && echo && exit 1
+
+			success "Success" ; echo " create ${OPT_SCSR}"
+			echo
+			echo
+		fi
+
+		printf "* %d. " "${I}"
+		success "Make Self signed certificate";
+		echo; echo
+		let I++
+
+		${cmd_openssl} x509 -in ${OPT_SCSR} -out ${OPT_SCRT} -req -signkey ${OPT_PKEY} -days 3650
+
+		[ $? -ne 0 ] && \
+			echo -n "${OPT_PKEY} create .. " && failure && echo && exit 1
+
+		success "Success" ; echo " create ${OPT_SCRT}"
+		rm -f ${OPT_SCSR}
+
+	else
+		echo -n " .. ${OPT_SCRT} "
+		success "already exsist"
+		echo;
+	fi
+
+	${cmd_chown} ldap:ldap ${OPT_PKEY}
+	${cmd_chmod} 600 ${OPT_PKEY}
+	[ -f "${OPT_SCSr}" ] && rm -f ${OPT_SCSR}
+	${cmd_chown} ldap:ldap ${OPT_SCRT}
+
+	exit $?
+elif [ "${OPT_MODE}" = "add" ]; then
+	echo
+	${cmd_cat} <<EOF
+Your informations:
+    Ca Certificate     : ${OPT_CKEY}
+    Server Certificate : ${OPT_SCRT}
+    Server Key         : ${OPT_PKEY}
+
+EOF
+
+	${cmd_chown} ldap:ldap ${OPT_PKEY}
+	${cmd_chmod} 600 ${OPT_PKEY}
+	${cmd_chown} ldap:ldap ${OPT_SCRT}
+
+	${cmd_ldapsearch} ${LDAP_PRIV} -b "cn=config" "(cn=config)" olcTLSCACertificateFile 2> /dev/null | \
+		${cmd_grep} "olcTLSCACertificateFile:" >& /dev/null
+	[ $? -eq 0 ] && camod="replace" || camod="add"
+
+	${cmd_ldapsearch} ${LDAP_PRIV} -b "cn=config" "(cn=config)" olcTLSCertificateFile 2> /dev/null | \
+		${cmd_grep} "olcTLSCertificateFile:" >& /dev/null
+	[ $? -eq 0 ] && samod="replace" || samod="add"
+
+	${cmd_ldapsearch} ${LDAP_PRIV} -b "cn=config" "(cn=config)" olcTLSCertificateKeyFile 2> /dev/null | \
+		${cmd_grep} "olcTLSCertificateKeyFile:" >& /dev/null
+	[ $? -eq 0 ] && keymod="replace" || keymod="add"
+
+	${cmd_cat} <<EOF | ${cmd_ldapmodify} ${LADP_PRIV} >& /dev/null
+dn: cn=config
+changetype: modify
+${camod}: olcTLSCACertificateFile
+olcTLSCACertificateFile: ${OPT_CKEY}
+-
+${samod}: olcTLSCertificateFile
+olcTLSCertificateFile: ${OPT_SCRT}
+-
+${keymod}: olcTLSCertificateKeyFile
+olcTLSCertificateKeyFile: ${OPT_PKEY}
+EOF
+
+	[ $? -ne 0 ] && stderr "Error: failed add ssl configurations\n" && exit 1
+
+	${cmd_cat} /etc/sysconfig/ldap | ${cmd_grep} "^[ \t]*SLAPD_LDAPS=" >& /dev/null
+	[ $? -ne 0 ] && \
+		${cmd_perl} -pi -e 's/^[\s]*#[\s]*SLAPD_LDAPS=/SLAPD_LDAPS=/g' /etc/sysconfig/ldap
+
+	${cmd_cat} /etc/sysconfig/ldap | ${cmd_grep} "^[ \t]*SLAPD_LDAPS=" >& /dev/null
+	[ $? -ne 0 ] && \
+		echo "SLAPD_LDAPS=yes" >> /etc/sysconfig/ldap || \
+		${cmd_perl} -pi -e 's/^[\s]*SLAPD_LDAPS=.*/SLAPD_LDAPS=yes/g' /etc/sysconfig/ldap
+
+	success "Regist success"
+	echo " Please restart slapd daemon!"
+
+elif [ "${OPT_MODE}" = "rem" ]; then
+
+	${cmd_cat} <<EOF | ${cmd_ldapmodify} ${LADP_PRIV} >& /dev/null
+dn: cn=config
+changetype: modify
+delete: olcTLSCACertificateFile
+-
+replace: olcTLSCertificateFile
+olcTLSCertificateFile: "OpenLDAP Server"
+-
+replace: olcTLSCertificateKeyFile
+olcTLSCertificateKeyFile: /etc/openldap/certs/password
+EOF
+
+	[ $? -ne 0 ] && stderr "Error: failed remove ssl configurations\n" && exit 1
+
+	${cmd_perl} -pi -e 's/^[\s]*SLAPD_LDAPS=.*/SLAPD_LDAPS=no/g' /etc/sysconfig/ldap
+
+	success "Remove success"
+	echo " Please restart slapd daemon!"
+else
+	help
+fi
+
+exit 0
+
+#
+# Local variables:
+# tab-width: 4
+# c-basic-offset: 4
+# End:
+# vim: set filetype=sh noet sw=4 ts=4 fdm=marker:
+# vim<600: noet sw=4 ts=4:
+#

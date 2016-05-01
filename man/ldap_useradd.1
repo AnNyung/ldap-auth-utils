@@ -1,0 +1,92 @@
+.TH LDAP_USERADD 1 "29 Apr 2016"
+.
+.SH NAME
+.hy 0
+.
+.BI ldap_useradd
+\- add ldap user
+.
+.SH SYNOPSIS
+.B ldap_useradd
+[OPTION] {ACCOUNT FORMAT}
+
+.B {ACCOUNT FROMAT}
+.IP
+# uid=user,ou=People,dc=domain,dc=com
+.br
+.BI user@domian.com
+.sp
+.
+.SH DESCRIPTION
+ldap_useradd is add ldap user on ldap user entries
+
+.TP
+add LDAP_USER with BASE DN 'dc=DOMAIN,dc=COM':
+.B ldap_useradd
+LDAP_USER@DOMAIN.COM
+.TP
+add LDAP_USER with option:
+.B ldap_useradd
+-n "Michael" -l "Jackson" LDAP_USER@DOMAIN.COM
+.TP
+add LDAP_USER with interactive mode
+.B ldap_useradd
+-i LDAP_USER@DOMAIN.COM
+.PP
+This is used many environment variables in ldap-auth-utils.conf(5). See also
+.B 'man 5 ldap-auth-utils.conf'
+.
+.SH OPTIONS
+.IP -d
+Set home directory. The default value is /home/ldapusers/USERNAME.
+.IP -e
+Expiration date. The default value is unlimited. The format is
+"YYYY-MM-DD HH:mm:SS" or unix timestamp
+.IP -g
+ID of the primary group The default value is ldapusers who's gid is 10000.
+.IP -G
+list of supplementary groups. It is possible to use several times.
+.IP -h
+display help message and exit
+.IP -H
+host access privileges. It is possible to use several times.
+.IP -i
+interactive mode. ignore other options
+.IP -n
+Set real Name
+.IP -l
+Set last Name
+.IP -p
+Set password. plain strings or hashed string(with {CRYPT})
+.IP -s
+Set login shell. The default value is /bin/bash
+.IP -y
+None intercative mode
+.IP --gecos
+Set GECOS field of passwd entry
+.
+.SH "EXIT STATUS"
+Normally, the exit status is 0 if no errors, and 1 otherwise.
+.
+.SH COPYRIGHT
+Copyright 2016 JoungKyun.Kim
+.PP
+This is free software;
+see the source for copying conditions.
+There is NO warranty;
+not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+.
+.SH BUGS
+bug tracker is located at <https://github.com/Joungkyun/ldap-auth-utils/issues>.
+.
+.SH "SEE ALSO"
+.BR ldap-auth-utils.conf(5),
+.BR ldap_auth_init(1),
+.BR ldap_auth(1),
+.BR ldap_ssl(1),
+.BR ldap_grpadd(1),
+.BR ldap_grpdel(1),
+.BR ldap_host_manage(1),
+.BR ldap_passwd(1),
+.BR ldap_replica(1),
+.BR ldap_userdel(1)

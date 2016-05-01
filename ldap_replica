@@ -1,0 +1,490 @@
+#!/bin/bash
+
+# ldap_ssl - managed ldap ssl configuration
+# Copyright (C) 2016  JoungKyun.Kim <http://oops.org>
+#
+# This file is part of ldap-auth-utils
+#
+# ldap-auth-utils is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# ldap-auth-utils is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+source "@datadir@/functions"
+
+help() {
+	stderr "ldap_replica: management ldap 2way multi master replication\n"
+	stderr "Usage: ldap_replica [OPTIONS] REPLICA_SERVER\n"
+	stderr "Options:\n"
+	stderr "    -a               add replcation configuration on this server\n"
+	stderr "    -i               Server ID on this server [default: RAMDOM]\n"
+	stderr "    -r               remove replication configuration on this server\n"
+	stderr "    -u USER_RDN      replication user dn\n\n"
+	stderr "Example\n"
+	stderr "    ldap_replica -a -u uid=replica,ou=admin,dc=host,dc=com ldap.target.com\n"
+	stderr "    ldap_replica -r\n\n"
+	exit 1
+}
+
+change_server_id() {
+	local id="$1"
+	${cmd_cat} <<EOF | ${cmd_ldapmodify} ${LDAP_PRIV} >& /dev/null
+dn: cn=config
+changetype: modify
+replace: olcServerID
+olcServerID: ${id}
+EOF
+	return $?
+}
+
+change_replica_config() {
+	local mod="${1,,}"
+	local target="$2"
+	local binddn="$3"
+	local credencial="$4"
+	local basedn="$5"
+
+	case "$mod" in
+		"add" | "replace" | "remove" ) ;;
+		*)
+			# invalide mode type (allow add or replace)
+			return 10
+			;;
+	esac
+
+	if [ "${mod}" = "remove" ]; then
+		${cmd_cat} <<EOF | ${cmd_ldapmodify} ${LDAP_PRIV} >& /dev/null
+dn: olcDatabase={2}bdb,cn=config
+changetype: modify
+delete: olcSyncRepl
+EOF
+		return $?
+	fi
+
+
+	${cmd_cat} <<EOF | ${cmd_ldapmodify} ${LDAP_PRIV} >& /dev/null
+dn: olcDatabase={2}bdb,cn=config
+changetype: modify
+${mod}: olcSyncRepl
+olcSyncRepl: rid=001
+  provider=ldaps://${target}/
+  bindmethod=simple
+  binddn="${binddn}"
+  credentials=${credencial}
+  searchbase="${basedn}"
+  scope=sub
+  schemachecking=on
+  type=refreshAndPersist
+  retry="30 5 300 3"
+  interval=00:00:05:00
+EOF
+	return $?
+}
+
+toggle_mirror_mode() {
+	local mod="${1,,}"
+	local boolv="${2,,}"
+
+	case "${boolv}" in
+		"on")
+			boolv="TRUE"
+			;;
+		*)
+			boolv="FALSE"
+	esac
+
+	${cmd_cat} <<EOF | ${cmd_ldapmodify} ${LDAP_PRIV} >& /dev/null
+dn: olcDatabase={2}bdb,cn=config
+changetype: modify
+${mod}: olcMirrorMode
+olcMirrorMode: ${boolv}
+EOF
+	return $?
+}
+
+
+
+
+
+
+conf_context=$(LANG="C" ${cmd_sed} -n -f ${datadir}/config.sed ${confdir}/ldap-auth-utils.conf)
+eval ${conf_context}
+
+OPT_MODE=""
+OPT_SRVID=$(( ${RANDOM} % 100 ))
+
+opts=$(${cmd_getopt} -u -n "$(${cmd_basename} "$0")" -o ,a,c,h,i:,p:,r,s:,u: -- "$@")
+[ $? -ne 0 ] && help
+
+set -- ${opts}
+while true
+do
+	case "$1" in
+		-a)
+			[ -n "${OPT_MODE}" ] && stderr "Error: The options -a can not use with -r\n" && exit 1
+			OPT_MODE="add"
+			;;
+		-h) help ;;
+		-i)
+			OPT_SRVID="$2"; shift
+			;;
+		-r)
+			[ -n "${OPT_MODE}" ] && stderr "Error: The options -r can not use with -a\n" && exit 1
+			OPT_MODE="rem"
+			;;
+		-u)
+			OPT_USER="$2"; shift
+			;;
+		--) shift; break;;
+	esac
+	shift
+done
+
+if [ "${OPT_MODE}" != "add" ]; then
+	[ $# -ne 0 ] && help
+else
+	[ $# -ne 1 ] && help
+fi
+
+OPT_TARGET="$1"
+OPT_BIND=$(echo ${OPT_USER} | sed 's/\(uid\|ou\)=[^,]*,//g')
+
+if [ "${OPT_MODE}" = "add" ]; then
+	echo "${OPT_USER}" | ${cmd_grep} "^\(uid\|cn\)=" >& /dev/null
+	[ $? -ne 0 ] && \
+		stderr "\nError: REPLICA user dn format error!\n\n" && help
+
+	u=$(echo ${OPT_USER} | ${cmd_sed} -e 's/,ou=.*//g' -e 's/^uid=//g')
+	passwd_prompt "Input ${u} password"
+	OPT_PASS=$prompt_value
+
+	${cmd_ldapsearch} -x -H ldaps://${OPT_TARGET}/ -D "${OPT_USER}" -w "${OPT_PASS}" "(uid=${u})" >& /dev/null
+	RET=$?
+
+	if [ ${RET} -eq 49 ]; then
+		OPT_STATUS="$(failure "${u} login failed")"
+	else
+		${cmd_ldapsearch} -x -H ldaps://${OPT_TARGET}/ -D "${OPT_USER}" -w "${OPT_PASS}" "(uid=${u})" 2> /dev/null | \
+			${cmd_grep} 'userPassword::' >& /dev/null
+		RET=$?
+		[ $RET -ne 0 ] && OPT_STATUS="$(failure "Invalid access privileges")" || OPT_STATUS="$(success)"
+	fi
+fi
+
+
+if [ "${OPT_MODE}" = "add" ]; then
+	#
+	# Add mode
+	#
+	echo "You Informations:"
+	echo
+	echo "    Replica Account         : ${OPT_USER}"
+	echo "    Replica BIND DN         : ${OPT_BIND}"
+    echo "    Replica Pre Test        : ${OPT_STATUS}"
+	echo "    Replica Server ID       : ${OPT_SRVID}"
+	echo "    Replica Target          : ${OPT_TARGET}"
+	echo
+
+	[ ${RET} -ne 0 ] && exit 1
+
+	while true
+	do
+		prompt "Is right your information? [Y/N]"
+		case "${prompt_value^^}" in
+			N) exit ;;
+			Y) echo ""; break ;;
+		esac
+	done
+
+	echo -n " * 1. Regist sync module ... "
+
+	${cmd_ldapsearch} ${LDAP_PRIV} -b "cn=config" "(cn=module*)" 2> /dev/null | \
+		${cmd_grep} "syncprov.la" >& /dev/null
+	RET=$?
+
+	uname -m | ${cmd_grep} "x86_64" >& /dev/null
+	[ $? -eq 0 ] && libdir="lib64" || libdir="lib"
+
+	if [ ${RET} -ne 0 ]; then
+		${cmd_cat} <<EOF | ${cmd_ldapadd} -a -c ${LDAP_PRIV} >& /dev/null
+dn: cn=module,cn=config
+objectClass: olcModuleList
+cn: module
+olcModulePath: /usr/${libdir}/openldap
+olcModuleLoad: syncprov.la
+
+dn: olcOverlay=syncprov,olcDatabase={2}bdb,cn=config
+objectClass: olcOverlayConfig
+objectClass: olcSyncProvConfig
+olcOverlay: syncprov
+olcSpSessionLog: 100
+EOF
+		RET=$?
+		[ ${RET} -ne 0 ] && failure "regist failed" && echo && exit 1
+	else
+		success
+		echo
+	fi
+
+	echo -n " * 2. Set Server ID ... "
+
+	SRVID=$(${cmd_ldapsearch} ${LDAP_PRIV} -b "cn=config" "(cn=config)" olcServerID 2> /dev/null | ${cmd_grep} "^olcServerID: [0-9]\+")
+	RET=$?
+
+	if [ ${RET} -eq 0 ]; then
+		SRVID=${SRVID##* }
+
+		if [ ${OPT_SRVID} -ne ${SRVID} ]; then
+			failure "Already set server id to ${SRVID}"
+			echo
+
+			while true
+			do
+				prompt "      Do you want to change server id to ${OPT_SRVID} on this server? [Y/N]"
+				case "${prompt_value^^}" in
+					Y)
+						echo -n "      => set server id to ${OPT_SRVID} ... "
+						change_server_id ${OPT_SRVID}
+						RET=$?
+						if [ ${RET} -eq 0 ]; then
+							success; echo
+						else
+							failure; echo
+							exit 1
+						fi
+						;;
+					N) ;;
+					*) continue ;;
+				esac
+				break;
+			done
+
+		else
+			success "already set ${SRVID}"
+			echo
+		fi
+	else
+		change_server_id ${OPT_SRVID}
+		RET=$?
+		if [ ${RET} -eq 0 ]; then
+			success; echo
+		else
+			failure; echo
+			exit 1
+		fi
+	fi
+
+
+	echo -n " * 3. Set replica server ... "
+
+	REPLICA=$(${cmd_ldapsearch} ${LDAP_PRIV} -o ldif-wrap=no -b "olcDatabase={2}bdb,cn=config" "(olcDatabase={2}bdb)" olcSyncRepl 2> /dev/null | ${cmd_grep} "^olcSyncrepl: ")
+	RET=$?
+
+	if [ ${RET} -eq 0 ]; then
+		failure "Already set replica config!"
+		echo
+
+		REPLICA=$(echo ${REPLICA#*\}} | sed 's/=/_repl_val=/g')
+		eval "${REPLICA#*\}}"
+
+		searchbase_repl_val=${searchbase_repl_val//_repl_val}
+		binddn_repl_val=${binddn_repl_val//_repl_val}
+		provider_repl_val=${provider_repl_val//_repl_val}
+
+		echo
+		echo "      ++ Exsited Replica config"
+		echo "         rid        : ${rid_repl_val}"
+		echo "         provider   : ${provider_repl_val}"
+		echo "         binddn     : ${binddn_repl_val}"
+		echo "         searchbase : ${searchbase_repl_val}"
+		echo
+
+		while true
+		do
+			prompt "      Do you want to change replica config on this server? [Y/N]"
+			case "${prompt_value^^}" in
+				Y)
+					echo -n "      => modifing replica server config ... "
+					change_replica_config "replace" "${OPT_TARGET}" "${OPT_USER}" "${OPT_PASS}" "${OPT_BIND}"
+					RET=$?
+					if [ ${RET} -eq 0 ]; then
+						success; echo
+					else
+						failure; echo
+						exit 1
+					fi
+					;;
+				N) ;;
+				*) continue ;;
+			esac
+			break;
+		done
+	else
+		change_replica_config "add" "${OPT_TARGET}" "${OPT_USER}" "${OPT_PASS}" "${OPT_BIND}"
+		RET=$?
+		if [ ${RET} -eq 0 ]; then
+			success; echo
+		else
+			failure; echo
+			exit 1
+		fi
+	fi
+
+	echo -n " * 4. Set Mirror mode ... "
+
+	MIRROR_MODE=$(${cmd_ldapsearch} ${LDAP_PRIV} -b "olcDatabase={2}bdb,cn=config" "(olcDatabase={2}bdb)" olcMirrorMode 2> /dev/null | ${cmd_grep} "^olcMirrorMode: ")
+	RET=$?
+
+	if [ ${RET} -eq 0 ]; then
+		MIRROR_MODE=${MIRROR_MODE##* }
+		MIRROR_MODE=${MIRROR_MODE^^}
+
+		if [ "${MIRROR_MODE}" = "TRUE" ]; then
+			success; echo
+		else
+			toggle_mirror_mode "replace" "on"
+			RET=$?
+			if [ ${RET} -eq 0 ]; then
+				success; echo
+			else
+				failure; echo
+				exit 1
+			fi
+		fi
+	else
+		toggle_mirror_mode "add" "on"
+		RET=$?
+		if [ ${RET} -eq 0 ]; then
+			success; echo
+		else
+			failure; echo
+			exit 1
+		fi
+	fi
+
+
+	echo -n " * 5. Set replica overlay ... "
+
+	${cmd_ldapsearch} ${LDAP_PRIV} -b "olcOverlay={1}syncprov,olcDatabase={2}bdb,cn=config" >& /dev/null
+	RET=$?
+
+	if [ ${RET} -eq 0 ]; then
+		success; echo
+	else
+		${cmd_cat} <<EOF | ${cmd_ldaymodify} ${LDAP_PRIV} >& /dev/null
+dn: olcOverlay=syncprov,olcDatabase={2}bdb,cn=config
+changetype: add
+objectClass: olcOverlayConfig
+objectClass: olcSyncProvConfig
+olcOverlay: syncprov
+EOF
+		RET=$?
+		if [ ${RET} -eq 0 ]; then
+			success; echo
+		else
+			failure; echo
+			exit 1
+		fi
+	fi
+
+	echo
+	success "Complete configuration."; echo
+	echo
+
+elif [ "${OPT_MODE}" = "rem" ]; then
+	#
+	# remove mode
+	#
+	echo -n " * 1. Set Mirror mode ... "
+
+	MIRROR_MODE=$(${cmd_ldapsearch} ${LDAP_PRIV} -b "olcDatabase={2}bdb,cn=config" "(olcDatabase={2}bdb)" olcMirrorMode 2> /dev/null | ${cmd_grep} "^olcMirrorMode: ")
+	RET=$?
+
+	if [ ${RET} -eq 0 ]; then
+		MIRROR_MODE=${MIRROR_MODE##* }
+		MIRROR_MODE=${MIRROR_MODE^^}
+
+		if [ "${MIRROR_MODE}" != "TRUE" ]; then
+			success; echo
+		else
+			toggle_mirror_mode "replace" "off"
+			RET=$?
+			if [ ${RET} -eq 0 ]; then
+				success; echo
+			else
+				failure; echo
+				exit 1
+			fi
+		fi
+	else
+		success; echo
+	fi
+
+	echo -n " * 2. Remove replica server ... "
+
+	REPLICA=$(${cmd_ldapsearch} ${LDAP_PRIV} -o ldif-wrap=no -b "olcDatabase={2}bdb,cn=config" "(olcDatabase={2}bdb)" olcSyncRepl 2> /dev/null | ${cmd_grep} "^olcSyncrepl: ")
+	RET=$?
+
+	if [ ${RET} -eq 0 ]; then
+		change_replica_config "remove"
+		RET=$?
+		if [ ${RET} -eq 0 ]; then
+			success; echo
+		else
+			failure; echo
+			exit 1
+		fi
+	else
+		success; echo
+	fi
+else
+	#
+	# View mode
+	#
+
+	REPLICA=$(${cmd_ldapsearch} ${LDAP_PRIV} -o ldif-wrap=no -b "olcDatabase={2}bdb,cn=config" "(olcDatabase={2}bdb)" olcSyncRepl 2> /dev/null | ${cmd_grep} "^olcSyncrepl: ")
+	RET=$?
+
+	if [ ${RET} -ne 0 ]; then
+		failure "This server is not set replica configuration!"
+		echo
+		exit 0
+	fi
+
+	REPLICA=$(echo ${REPLICA#*\}} | sed 's/=/_repl_val=/g')
+	eval "${REPLICA#*\}}"
+
+	searchbase_repl_val=${searchbase_repl_val//_repl_val}
+	binddn_repl_val=${binddn_repl_val//_repl_val}
+	provider_repl_val=${provider_repl_val//_repl_val}
+
+	echo
+	success "  ++ Current Replica config"
+	echo
+	echo "     rid        : ${rid_repl_val}"
+	echo "     provider   : ${provider_repl_val}"
+	echo "     binddn     : ${binddn_repl_val}"
+	echo "     searchbase : ${searchbase_repl_val}"
+	echo
+fi
+
+
+exit 0
+
+#
+# Local variables:
+# tab-width: 4
+# c-basic-offset: 4
+# End:
+# vim: set filetype=sh noet sw=4 ts=4 fdm=marker:
+# vim<600: noet sw=4 ts=4:
+#

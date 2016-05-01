@@ -1,0 +1,458 @@
+#!/bin/bash
+
+# ldap_useradd - add ldap user
+# Copyright (C) 2016  JoungKyun.Kim <http://oops.org>
+#
+# This file is part of ldap-auth-utils
+#
+# ldap-auth-utils is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# ldap-auth-utils is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+source "@datadir@/functions"
+
+help() {
+	stderr "ldap_useradd: Add user to LDAP database\n"
+	stderr "Usage: ldap_useradd [OPTIONS] USERNAME\n"
+	stderr "Options:\n"
+	stderr "    -d HOME_DIR      home directory [Default: /home/ldapusers/USERNAME]\n"
+	stderr "    -e EXPIRE_DATE   expiration date [Default: unlimit(0)]\n"
+	stderr "                     Fromat is \"YYYY-MM-DD HH:mm:SS\" or unix timestamp\n"
+	stderr "    -g GID           ID of the primary group [Default: ldapusers(10000)]\n"
+	stderr "    -G GROUPS        list of supplementary groups\n"
+	stderr "    -h               display this help message and exit\n"
+	stderr "    -H FQDN          host access privileges\n"
+	stderr "    -i               interactive mode. ignore other options\n"
+	stderr "    -n NAME          Real Name\n"
+	stderr "    -l LAST NAME     Last Name\n"
+	stderr "    -p PASSWORD      password. plain string or hashed string(with {CRYPT})\n"
+	stderr "    -s SHELL         login shell [Default: /bin/bash]\n"
+	stderr "    -u UID           user ID [Default: MAXUID + 1]\n"
+	stderr "    -y               None intercative mode\n"
+	stderr "    --gecos          Set GECOS field of passwd entry\n"
+	stderr "\n"
+	stderr "USERNAME format\n"
+	stderr "    FROMAT : ACCOUNT@DOMAIN_NAME\n\n"
+	stderr "    if base dn of LDAP is \"dc=DOMAIN,dc=COM\", domain name is \"DOMAIN.COM\".\n"
+	stderr "\nExamples:\n"
+	stderr "    # add LDAP_USER with BASE DN 'dc=DOMAIN,dc=COM'\n"
+	stderr "    ldap_useradd LDAP_USER@DOMAIN.COM\n\n"
+	stderr "    # add LDAP_USER with option\n"
+	stderr "    ldap_useradd -n \"Michael\" -l \"Jackson\" LDAP_USER@DOMAIN.COM\n"
+	stderr "    # add LDAP_USER with interactive mode\n"
+	stderr "    ldap_useradd -i LDAP_USER@DOMAIN.COM\n"
+	exit 1
+}
+
+
+conf_context=$(LANG="C" ${cmd_sed} -n -f ${datadir}/config.sed ${confdir}/ldap-auth-utils.conf)
+eval ${conf_context}
+
+PASSWD_MECH=${PASSWD_MECH:=md5}
+
+USER_DN=${USER_DN:=People}
+GROUP_DN=${GROUP_DN:=Group}
+
+PASS_MAX_DAYS=${PASS_MAX_DAYS:=$(${cmd_grep} "^PASS_MAX_DAYS[ ]\+" /etc/login.defs 2> /dev/null | ${cmd_awk}'{print $2}')}
+PASS_MIN_DAYS=${PASS_MIN_DAYS:=$(${cmd_grep} "^PASS_MIN_DAYS[ ]\+" /etc/login.defs 2> /dev/null | ${cmd_awk}'{print $2}')}
+PASS_WARN_AGE=${PASS_WARN_AGE:=$(${cmd_grep} "^PASS_WARN_AGE[ ]\+" /etc/login.defs 2> /dev/null | ${cmd_awk}'{print $2}')}
+
+PASS_MAX_DAYS=${PASS_MAX_DAYS:=99999}
+PASS_MIN_DAYS=${PASS_MIN_DAYS:=0}
+PASS_WARN_AGE=${PASS_WARN_AGE:=7}
+
+PASS_MINLEN=${PASS_MINLEN:=9}
+PASS_CLASSES=${PASS_CLASSES:=0}
+
+MIN_UID=${MIN_UID:=10000}
+MIN_GID=${MIN_GID:=10000}
+
+OPT_CRYPT_SALT=
+set_crypt_salt $PASSWD_MECH
+
+OPT_INT=0
+OPT_EXPIRE=0
+OPT_GID=${OPT_GID:=10000}
+OPT_GROUPS="${OPT_GROUPS}"
+OPT_NAME=""
+OPT_SURNAME=""
+OPT_PASSWD=""
+OPT_SHELL=${OPT_SHELL:=/bin/bash}
+OPT_UID=0
+OPT_HOSTS=""
+OPT_GECOS=${OPT_GECOS:="LDAP Users"}
+OPT_HOME_PREFIX=${OPT_HOME_PREFIX:=/home/ldapusers}
+
+HOST_OBJ_CLASS_DESC="objectClass: hostObject"
+
+opts=$(${cmd_getopt} -u -n "$(${cmd_basename} "$0")" -o d:,e:,g:,G:,h,H:,i,l:,n:,p:,s:,u:,y -l gecos: -- "$@")
+[ $? -ne 0 ] && help
+
+set -- ${opts}
+while true
+do
+	case "$1" in
+		-d) OPT_HOME="$2"; shift ;;
+		-e) OPT_EXPIRE="$2"; shift ;;
+		-g)
+			OPT_GID="$2";
+			is_numeric $OPT_GID
+			[ $? -ne 0 ] && stderr "Error: The value of -g option is must numeric\n" && help
+			[ ${OPT_GID} -lt ${MIN_GID} ] && stderr "Error: The value of -g option is bigger than ${MIN_GID}\n" && help
+			shift
+			;;
+		-G) OPT_GROUPS="${OPT_GROUPS} $2"; shift ;;
+		-h) help ;;
+		-H) OPT_HOSTS="${OPT_HOSTS} $2"; shift ;;
+		-i) OPT_INT=1 ;;
+		-l) OPT_SURNAME="$2"; shift ;;
+		-n) OPT_NAME="$2"; shift ;;
+		-p) OPT_PASSWD="$2"; shift ;;
+		-s) OPT_SHELL="$2"; shift ;;
+		-u)
+			OPT_UID="$2";
+			is_numeric $OPT_GID
+			[ $? -ne 0 ] && stderr "Error: The value of -u option is must numeric\n" && help
+			[ ${OPT_UID} -lt ${MIN_UID} ] && stderr "Error: The value of -u option is bigger than ${MIN_UID}\n" && help
+			shift
+			;;
+		-y) OPT_INT=-1 ;;
+		--gecos)
+			OPT_GECOS="$2"
+			shift
+
+			while true
+			do
+				echo $2 | ${cmd_grep} -v -- "^-[a-zA-Z]" >& /dev/null
+				RET=$?
+				[ ${RET} -eq 0 ] && OPT_GECOS="${OPT_GECOS} $2" && shift && continue
+				[ ${RET} -ne 0 ] && break
+			done
+
+			;;
+		--) shift; break;;
+	esac
+	shift
+done
+
+[ $# -ne 1 ] && help
+OPT_USERID="$1"
+set_basedn_by_domain "${OPT_USERID}"
+[ $? -ne 0 ] && \
+	stderr "Error: invalide USERNAME '${OPT_USERID}'\n" && help
+
+USER_SCHEME="ou=${USER_DN},${BASEDN}"
+GROUP_SCHEME="ou=${GROUP_DN},${BASEDN}"
+
+if [ ${OPT_UID} -eq 0 ]; then
+	find_maxuid
+	OPT_UID=${RETVAL}
+fi
+
+check_user_exists ${OPT_USERID}
+if [ $? -eq 0 ]; then
+	stderr "\nError: ${OPT_USERID} is already exists!!!\n\n"
+	exit 1
+fi
+
+OPT_HOME="${OPT_HOME:=${OPT_HOME_PREFIX}/${OPT_USERID}}"
+OPT_GROUPS=$(echo ${OPT_GROUPS} | ${cmd_sed} 's/^[ ]\+\|[ ]\+$//g')
+OPT_HOSTS=$(echo ${OPT_HOSTS} | ${cmd_sed} 's/^[ ]\+\|[ ]\+$//g')
+
+if [ $OPT_INT -eq 1 ]; then
+	prompt_must "Your Given Name                         "
+	OPT_SURNAME="${prompt_value}"
+	prompt_must "Your Surname                            "
+	OPT_NAME="${prompt_value}"
+	prompt_def "$OPT_GECOS" "Password entry GECOS                    "
+	OPT_GECOS="${prompt_value}"
+
+	while true
+	do
+		prompt_def 0 "Set UID [Default: ${OPT_UID}]                "
+		is_numeric ${prompt_value}
+		[ $? -ne 0 ] && echo "     .. The values are must numeric!" && continue
+		[ ${prompt_value} -lt ${MIN_UID} ] && \
+			stderr "     .. The values are bigger than ${MIN_UID}\n" && continue
+
+		OPT_UID="${prompt_value}"
+		break
+	done
+
+	while true
+	do
+		prompt_def 10000 "Set GID [Default: 10000(ldapusers)]     "
+		is_numeric ${prompt_value}
+		[ $? -ne 0 ] && echo "     .. The values are must numeric!" && continue
+		[ ${prompt_value} -lt ${MIN_GID} ] && \
+			stderr "     .. The values are bigger than ${MIN_GID}\n" && continue
+
+		OPT_GID="${prompt_value}"
+		break
+	done
+
+	prompt_def "${OPT_HOME}" "Set Home Directory [Default: ${OPT_HOME}] "
+	OPT_HOME="${prompt_value}"
+	prompt_def 0 "Set Expire Date [Default: 0(unlimited)] "
+	OPT_EXPIRE="${prompt_value}"
+	prompt_def "/bin/bash" "Set Shell [Default: /bin/bash]          "
+	OPT_SHELL="${prompt_value}"
+
+	while [ true ]
+	do
+		prompt "Input additional group [Default: none]  "
+		[ -z "${prompt_value}" ] && break;
+
+		OPT_GROUPS="${OPT_GROUPS} ${prompt_value}"
+	done
+
+	while [ true ]
+	do
+		prompt "Input access host [Default: none]       "
+		[ -z "${prompt_value}" ] && break;
+
+		OPT_HOSTS="${OPT_HOSTS} ${prompt_value}"
+	done
+
+else
+	if [ ${OPT_INT} -eq -1 ]; then
+		[ -z "${OPT_NAME}" ]    && stderr "Error: -n option doesn't set!\n\n" && exit 1
+		[ -z "${OPT_SURNAME}" ] && stderr "Error: -l option doesn't set!\n\n" && exit 1
+	else
+		[ -z "${OPT_NAME}" ]    && prompt_must "Your Name    " && OPT_NAME="${prompt_value}"
+		[ -z "${OPT_SURNAME}" ] && prompt_must "Your Surname " && OPT_SURNAME="${prompt_value}"
+	fi
+fi
+
+if [ -z "${OPT_PASSWD}" ]; then
+
+	[ ${OPT_INT} -eq -1 ] && stderr "Error: -p (password) options doesn't set!\n\n" && exit 1
+
+	pass=""
+	while [ -z "${pass}" ]
+	do
+		passwd_prompt "Input password                          "
+		pass=$prompt_value
+
+		password_security "${pass}"
+		RET=$?
+
+		if [ $RET -ne 0 ]; then
+			[ $RET -eq 1 ] && echo "     .. The length of password is requried over ${PASS_MINLEN}"
+			[ $RET -eq 2 ] && echo "     .. password complexity problem" && \
+							  echo "        combined with ${PASS_CLASSES} classes with upper case," && \
+							  echo "        lower case, numeric or special character."
+			pass=""
+			continue
+		fi
+
+		passwd_prompt "Re-input password                       "
+		pass1=$prompt_value
+
+		if [ -n "${pass}" -a -n "${pass1}" ]; then
+			if [ "${pass}" != "${pass1}" ]; then
+				echo "     .. passwords doesn't match!"
+				pass=""
+			fi
+		else
+			echo "     .. passwords doesn't match!"
+			pass=""
+		fi
+	done
+
+	OPT_PASSWD=${pass}
+else
+	echo ${OPT_PWSSWD} | ${cmd_grep} -i "^{[a-z]\+\}.\+$" >& /dev/null
+
+	if [ $? -eq 0 ]; then
+		# hashed password
+		echo ${OPT_PWSSWD} | ${cmd_grep} -i "^{CRYPT}.\+$" >& /dev/null
+		if [ $? -ne 0 ]; then
+			stderr "Error: Unsupported password scheme.\n"
+			stderr "       This script supports only {CRYPT}. Use follows:\n"
+			stderr "       slappasswd -h {CRYPT} -c '$1$%.8s' -s \"CLEAR_PASSWORD\"\n\n"
+
+			exit 1
+		fi
+	fi
+fi
+
+# check password complexity
+password_security "${OPT_PASSWD}"
+RET=$?
+
+[ $RET -eq 1 ] && stderr "Error: The length of password is requried over ${PASS_MINLEN}\n" && exit 1
+if [ $RET -eq 2 ]; then
+	stderr "Error: password complexity problem\n"
+	stderr "       combined with ${PASS_CLASSES} classes with upper case, \n"
+	stderr "       lower case, numeric or special character.\n"
+	exit 1
+fi
+
+
+# check support hostObject 
+
+if [ -n "${OPT_HOSTS}" ]; then
+	is_object_enable "hostObject"
+	if [ $? -ne 0 ]; then
+		stderr "Warning: This ldap server don't support hostObject objectClass\n"
+		stderr "         Host configuration is ignored\n"
+		OPT_HOSTS=""
+		HOST_OBJ_CLASS_DESC=""
+	fi
+fi
+
+
+# crypt {md5,sha256,sha512}
+OPT_PASSWD=$(${cmd_slappasswd} -s "${OPT_PASSWD}" -h {crypt} -c "${OPT_CRYPT_SALT}")
+
+ldap_timestamp
+OPT_LASTCHANGE=${RET_TIMESTAMP}
+OPT_LASTCHANGE_STR="${RET_DATEFORMAT}"
+
+ldap_timestamp "${OPT_EXPIRE}"
+OPT_EXPIRE=${RET_TIMESTAMP}
+OPT_EXPIRE_STR="${RET_DATEFORMAT}"
+
+
+if [ "${OPT_UID}" -lt ${MIN_UID} ]; then
+	stderr "\nError: UID is must bigger than ${MIN_UDI}!!\n\n"
+	exit 1
+fi
+
+check_uniq_uid ${OPT_UID}
+if [ $? -eq 1 ]; then
+	stderr "\nError: ${OPT_UID} is already exists!!!\n\n"
+	exit 1
+fi
+
+
+${cmd_cat} <<EOF
+
+Your informations:
+
+    ID           : ${OPT_USERID}
+    UID          : ${OPT_UID}
+    GID          : ${OPT_GID}
+    HOME         : ${OPT_HOME}
+    SHELL        : ${OPT_SHELL}
+    Expire Date  : ${OPT_EXPIRE_STR} (${OPT_EXPIRE})
+    SURNAME      : ${OPT_SURNAME}
+    NAME         : ${OPT_NAME}
+    GECOS        : ${OPT_GECOS}
+    GROUP Lists  : ${OPT_GROUPS}
+    ACCEPT HOSTS : ${OPT_HOSTS}
+    Last Changes : ${OPT_LASTCHANGE_STR} (${OPT_LASTCHANGE})
+    Passwd HASH  : ${OPT_PASSWD}
+
+EOF
+
+[ "${OPT_EXPIRE}" = "99999" ] &&
+	OPT_EXPIRE="" ||
+	OPT_EXPIRE="shadowExpire: ${OPT_EXPIRE}"
+
+if [ ${OPT_INT} -ne -1 ]; then
+	prompt "Is right your informations? [Y/N]"
+
+	[ "${prompt_value}" != "Y" -a "${prompt_value}" != "y" ] && \
+		stderr "\nYou don't select yes(Y or y). So program is exited!\n" &&
+		exit 1
+fi
+
+
+if [ -n "${OPT_HOSTS}" ]; then
+	for host in ${OPT_HOSTS}
+	do
+		setHost="${setHost}host: ${host}
+"
+	done
+fi
+
+
+# shadow field
+# 필드 1 : 사용자명
+# 필드 2 : 패스워드
+# 필드 3 : 패스워드 파일 최종 수정일
+# 필드 4 : 패스워드 변경 최소일
+# 필드 5 : 패스워드 변경 최대일
+# 필드 6 : 패스워드 만료 경고기간
+# 필드 7 : 패스워드 파기 기간(패스워드 파기후 게정 비활성 기간)
+# 필드 8 : 계정 만료 기간
+# 필드 9 : 예약 필드
+
+OPT_PASSWD=$(echo ${OPT_PASSWD} | base64)
+
+${cmd_cat} <<EOF | ${cmd_grep} -v '^$' | ${cmd_ldapadd} -a -c ${LDAP_PRIV} >& /dev/null
+# create ${OPT_USERID}
+dn: uid=${OPT_USERID},${USER_SCHEME}
+
+objectClass: top
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+${HOST_OBJ_CLASS_DESC}
+
+uid: ${OPT_USERID}
+cn: ${OPT_USERID}
+gecos: ${OPT_GECOS}
+givenName: ${OPT_NAME}
+sn: ${OPT_SURNAME}
+uidNumber: ${OPT_UID}
+gidNumber: ${OPT_GID}
+loginShell: ${OPT_SHELL}
+homeDirectory: ${OPT_HOME}
+
+${setHost}
+
+shadowMin: ${PASS_MIN_DAYS}
+shadowMax: ${PASS_MAX_DAYS}
+shadowWarning: ${PASS_WARN_AGE}
+${OPT_EXPIRE}
+shadowLastChange: ${OPT_LASTCHANGE}
+
+userPassword:: ${OPT_PASSWD}
+EOF
+
+RET=$?
+
+printf "Regist account %-27s ... " "${OPT_USERID}"
+[ $RET -eq 0 ] && success || failure
+echo
+
+for grp in ${OPT_GROUPS}
+do
+	printf "Regist member of %-25s ... " "${grp}"
+
+	check_group_exists ${grp}
+	[ $? -ne 0 ] && failure "not found" && echo && continue
+
+	#${cmd_cat} <<EOF
+	${cmd_cat} <<EOF | ${cmd_ldapmodify} ${LDAP_PRIV} >& /dev/null
+dn: cn=${grp},${GROUP_SCHEME}
+changetype: modify
+add: memberUid
+memberUid: ${OPT_USERID}
+EOF
+
+	[ $RET -eq 0 ] && success || failure
+	echo
+done
+
+#
+# Local variables:
+# tab-width: 4
+# c-basic-offset: 4
+# End:
+# vim: set filetype=sh noet sw=4 ts=4 fdm=marker:
+# vim<600: noet sw=4 ts=4:
+#
