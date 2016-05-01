@@ -297,8 +297,7 @@ check_group_attribute() {
 }
 
 set_crypt_salt() {
-	local method="$1"
-	method=$(upper ${method})
+	local method="${1^^}"
 
 	case "$method" in
 		SHA512)

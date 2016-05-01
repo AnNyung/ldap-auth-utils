@@ -155,7 +155,7 @@ EOF
 
 if [ ${OPT_INT} -eq 0 ]; then
 	prompt_def 'N' "Is right upper informations? [Y/${srYELLOW}N${sEND}] "
-	prompt_value="$(upper ${prompt_value})"
+	prompt_value="${prompt_value^^}"
 	[ "${prompt_value}" != "Y" ] && exit 0
 fi
 
@@ -168,7 +168,7 @@ else
 fi
 [ $? -eq 1 ] && stderr "Error: Can't found ${OPT_DN} attribute\n" && exit 1
 
-UOPT_DN=$(upper ${OPT_DN})
+UOPT_DN=${OPT_DN^^}
 if [ "${UOPT_DN}" = "GIDNUMBER" -o "${UOPT_DN}" = "UIDNUMBER" ]; then
 	[ "${UOPT_DN}" = "UIDNUMBER" ] && OPT_CHK=${MIN_UID} || OPT_CHK=${MIN_GID}
 	[ ${OPT_DNV} -lt ${OPT_CHK} ] && \

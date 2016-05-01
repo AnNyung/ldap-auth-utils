@@ -46,10 +46,6 @@ stderr() {
 	[ ${UID} -ne 0 ] && printf "$*" || printf "$*" > /dev/stderr
 }
 
-upper() {
-	echo "$*" | tr '[:lower:]' '[:upper:]'
-}
-
 set_basedn_by_domain() {
 	local id="$*"
 	local user=""
@@ -128,8 +124,7 @@ password_security() {
 }
 
 set_crypt_salt() {
-	local method="$1"
-	method=$(upper ${method})
+	local method="${1^^}"
 
 	case "$method" in
 		SHA512)

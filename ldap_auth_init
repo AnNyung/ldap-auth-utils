@@ -176,7 +176,7 @@ BASEDN="${opt}"
 BASEDN=$(echo ${BASEDN} | ${cmd_sed} 's/ //g')
 BASE=$(echo "$BASEDN" | ${cmd_perl} -pe 's/,\s*dc=.*//g' | ${cmd_perl} -pe 's/dc=/BASE=/g')
 eval "${BASE}"
-BASEUP="$(upper ${BASE})"
+BASEUP="${BASE^^}"
 
 opt=""
 while [ -z "${opt}" ]

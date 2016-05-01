@@ -66,7 +66,7 @@ for userid in $OPT_RM_USERS
 do
 	if [ ${OPT_INT} -eq 0 ]; then
 		prompt_def N "  * Do you want to remove '${userid}' account ? [yes/${srYELLOW}no${sEND}] "
-		prompt_value=$(upper "${prompt_value}")
+		prompt_value="${prompt_value^^}"
 	else
 		prompt_value="YES"
 	fi
