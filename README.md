@@ -1,5 +1,6 @@
 ldap-auth-utils
 ====
+[![GitHub license](https://img.shields.io/badge/license-GPLv2-blue.svg)](https://raw.githubusercontent.com/Joungkyun/ldap-auth-utils/master/LICENSE)
 
 ## License
 
