@@ -36,7 +36,9 @@ msgstr "                     다른 옵션은 무시 됩니다.\\n"
 msgid ""
 "             This program can not control that is smaller than ${MIN_UID}\\n"
 "\\n"
-msgstr "       이 프로그램은 ${MIN_UID} 보다 작은 UID는 관리하지 않습니다.\\n"
+msgstr ""
+"             이 프로그램은 ${MIN_UID} 보다 작은 UID는 관리하지 않습니다.\\n"
+"\\n"
 
 #: ../ldap_userdel:113
 #, sh-format
