@@ -1,0 +1,962 @@
+# ldap-auth-utils template file
+# Copyright (C) 2016 PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the ldap-auth-utils package.
+# JoungKyun.Kim <http://oops.org/>, 2016.
+#
+# made by
+#    xgettext -d default --from-code=euc-kr -L Shell -s \
+#       configure src/include/*.h src/sbin/oops-firewall contrib/oops-firewall.init*
+# if you merge new version, msgmerge -U old.po new.po
+# xgettext 0.13 support shell script
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: ldap-auth-utils 1.0.0\n"
+"Report-Msgid-Bugs-To: https://https://github.com/Joungkyun/ldap-auth-utils/issues\n"
+"POT-Creation-Date: 2016-05-21 18:24+0900\n"
+"PO-Revision-Date: 2016-05-22 02:53+0900\n"
+"Last-Translator: JoungKyun.Kim <http://oops.org>\n"
+"Language-Team: JoungKyun.Kim <http://oops.org>\n"
+"Language: Korean\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../ldap_useradd:30
+msgid "                     Fromat is \"YYYY-MM-DD HH:mm:SS\" or unix timestamp\\n"
+msgstr "                     형식은 \"YYYY-MM-DD HH:mm:SS\" 또는 유닉스 timestamp\\n"
+
+#: ../ldap_ssl:31
+msgid "                     other options are ignored\\n"
+msgstr "                     다른 옵션은 무시 됩니다.\\n"
+
+#: ../ldap_userdel:96
+#, sh-format
+msgid ""
+"             This program can not control that is smaller than ${MIN_UID}\\n"
+"\\n"
+msgstr "       이 프로그램은 ${MIN_UID} 보다 작은 UID는 관리하지 않습니다.\\n"
+
+#: ../ldap_userdel:113
+#, sh-format
+msgid "             confirm memberUid of ${rdn}\\n"
+msgstr "             ${rdn}의 memberUid 확인\\n"
+
+#: ../ldap_userdel:114
+#, sh-format
+msgid "             skip remove ${userid} account\\n\\n"
+msgstr "             ${userid} 계석 삭제 건너띔\\n\\n"
+
+#: ../ldap_replica:307
+#, sh-format
+msgid "         binddn     : ${binddn_repl_val}"
+msgstr ""
+
+#: ../ldap_replica:306
+#, sh-format
+msgid "         provider   : ${provider_repl_val}"
+msgstr ""
+
+#: ../ldap_replica:305
+#, sh-format
+msgid "         rid        : ${rid_repl_val}"
+msgstr ""
+
+#: ../ldap_replica:308
+#, sh-format
+msgid "         searchbase : ${searchbase_repl_val}"
+msgstr ""
+
+#: ../ldap_auth:140
+#, sh-format
+msgid "        ${errmsg}\\n"
+msgstr ""
+
+#: ../ldap_useradd:253
+#, sh-format
+msgid "        combined with ${PASS_CLASSES} classes with upper case,"
+msgstr "        대문자, 소문자, 숫자, 특수문자 중 3가지의"
+
+#: ../ldap_useradd:254
+msgid "        lower case, numeric or special character."
+msgstr "        조합으로 구성되어야 합니다."
+
+#: ../ldap_auth:188
+msgid "       If you want to this value, use -d option\\n"
+msgstr "       중복된 값을 사용하기룰 원한다면, -d 옵션을 사용하십시오\\n"
+
+#: ../ldap_useradd:282
+msgid "       This script supports only {CRYPT}. Use follows:\\n"
+msgstr "       이 스크립트는 {CRYPT}만 지원 합니다. 다음과 같이 사용하십시오:\\n"
+
+#: ../ldap_useradd:283
+msgid "       slappasswd -h {CRYPT} -c '$1$%.8s' -s \\"
+msgstr ""
+
+#: ../ldap_replica:304
+msgid "      ++ Exsited Replica config"
+msgstr "      ++ 설정 되어 있는 리플리케이션 설정"
+
+#: ../ldap_replica:316
+msgid "      => modifing replica server config ... "
+msgstr "      => 리플리케이션 서버 설정 변경 ... "
+
+#: ../ldap_replica:255
+#, sh-format
+msgid "      => set server id to ${OPT_SRVID} ... "
+msgstr "      => 서버 ID를 ${OPT_SRVID} 값으로 설정 ... "
+
+#: ../ldap_replica:313
+msgid "      Do you want to change replica config on this server? [Y/N]"
+msgstr "      이 서버의 리플리케이션 설정을 변경하겠습니까? [Y/N]"
+
+#: ../ldap_replica:252
+#, sh-format
+msgid ""
+"      Do you want to change server id to ${OPT_SRVID} on this server? [Y/N]"
+msgstr ""
+"      이 서버의 서버 ID를 ${OPT_SRVID} 값으로 변경하겠습니까? [Y/N]"
+
+#: ../ldap_userdel:88
+#, sh-format
+msgid "      Error: '${userid}' account is not found!!!\\n\\n"
+msgstr "      에러: '${userid}' 계정을 찾을 수 없습니다!!!\\n\\n"
+
+#: ../ldap_userdel:95
+#, sh-format
+msgid "      Error: The uid of '${userid}' account is ${uid}\\n"
+msgstr "      에러: '${userid}' 계정의 uid는 ${uid} 입니다.\\n"
+
+#: ../ldap_userdel:112
+msgid "      Error: failed remove additional group\\n"
+msgstr "      에러: 추가 그룹 삭제 실패\\n"
+
+#: ../ldap_userdel:80
+#, sh-format
+msgid "      Error: invalide USERNAME '${userid}'\\n"
+msgstr "      에러: '${userid}' USERNAME의 형식이 올바르지 않습니다.\\n"
+
+#: ../ldap_useradd:251
+#, sh-format
+msgid "     .. The length of password is requried over ${PASS_MINLEN}"
+msgstr "     .. 암호 길이는 ${PASS_MINLEN} 보다 커야 합니다."
+
+#: ../ldap_useradd:198
+#, sh-format
+msgid "     .. The values are bigger than ${MIN_GID}\\n"
+msgstr "     .. ${MIN_GID} 보다 커야 합니다.\\n"
+
+#: ../ldap_useradd:186
+#, sh-format
+msgid "     .. The values are bigger than ${MIN_UID}\\n"
+msgstr "     .. ${MIN_UID} 보다 커야 합니다.\\n"
+
+#: ../ldap_useradd:184 ../ldap_useradd:196
+msgid "     .. The values are must numeric!"
+msgstr "     .. 값은 숫자여야 합니다!"
+
+#: ../ldap_useradd:252
+msgid "     .. password complexity problem"
+msgstr "     .. 암호 복잡도 문제"
+
+#: ../ldap_auth_init:191 ../ldap_auth_init:195 ../ldap_useradd:264
+#: ../ldap_useradd:268
+msgid "     .. passwords doesn't match!"
+msgstr "     .. 암호가 맞지 않습니다!"
+
+#: ../ldap_auth:36
+msgid "    # View information LDAP_GROUP with BASE DN 'dc=DOMAIN,dc=COM\\n"
+msgstr "    # BASE DN 'dc=DOMAIN,dc=COM'으로 LDAP_GROUP 정보 출력\\n"
+
+#: ../ldap_auth:34
+msgid "    # View information LDAP_USER with BASE DN 'dc=DOMAIN,dc=COM'\\n"
+msgstr "    # BASE DN 'dc=DOMAIN,dc=COM'으로 LDAP_USER 정보 출력\\n"
+
+#: ../ldap_grpadd:39
+msgid "    # add LDAP_GROUP with gid 10010\\n"
+msgstr "    # gid 10010으로 LDAP_GRUOP을 등록\\n"
+
+#: ../ldap_useradd:50
+msgid "    # add LDAP_USER with option\\n"
+msgstr "    # 옵션으로 LDAP_USER를 등록\\n"
+
+#: ../ldap_grpadd:41
+msgid "    # add member of LDAP_GROUP@DOMAIN.COM\\n"
+msgstr "    # LDAP_GROUP@DOMAIN.COM의 멤버 등록\\n"
+
+#: ../ldap_host_manage:37
+msgid "    # remove HOST to LDAP_USER BASE DN 'dc=DOMAIN,dc=COM'\\n"
+msgstr "    # BASE DN 'dc=DOMAIN,dc=COM'인 LDAP_USER의 HOST 설정 제거\\n"
+
+#: ../ldap_auth:40
+msgid "    # remove attribute on LDAP_USER with BASE DN 'dc=DOMAIN,dc=COM'\\n"
+msgstr "    # BASE DN 'dc=DOMAIN,dc=COM'인 LDAP_USER의 속성 제거\\n"
+
+#: ../ldap_grpdel:37
+msgid "    # remove member of LDAP_GROUP@DOMAIN.COM\\n"
+msgstr "    # LDAP_GROUP@DOMAIN.COM의 멤버 삭제\\n"
+
+#: ../ldap_auth:38
+msgid ""
+"    # set or modify attribute on LDAP_USER with BASE DN 'dc=DOMAIN,dc=COM'\\n"
+msgstr ""
+"    # BASE DN 'dc=DOMAIN,dc=COM'인 LDAP_USER의 속성 설정 또는 수정\\n"
+
+#: ../ldap_userdel:76
+msgid "    * Remove account %-30s ... "
+msgstr "    * 계정 삭제 %-30s      ... "
+
+#: ../ldap_ssl:28
+msgid ""
+"    -C PATH          ca certicate [default: /etc/pki/tls/certs/ca-bundle."
+"crt]\\n"
+msgstr ""
+"    -C PATH          CA 인증서 [기본값: /etc/pki/tls/certs/ca-bundle.crt]\\n"
+
+#: ../ldap_replica:28
+msgid "    -a               add replcation configuration on this server\\n"
+msgstr "    -a               이 서버에 리플리케이션 설정 추가\\n"
+
+#: ../ldap_ssl:29
+msgid "    -a               add ssl configuration on this server\\n"
+msgstr "    -a               이 서버에 SSL 설정 추가\\n"
+
+#: ../ldap_ssl:30
+msgid ""
+"    -c               create private key and self signed server certificate\\n"
+msgstr ""
+"    -c               개인키 생성 및 서버 인증서 셀프 사인\\n"
+
+#: ../ldap_auth:28
+msgid "    -d               permit modify duplicated uidNumber/gidNumber\\n"
+msgstr "    -d               중복된 uidNumber/gidNumber 수정 허가\\n"
+
+#: ../ldap_grpadd:29
+msgid "    -d DESC          group description\\n"
+msgstr "    -d DESC          그룹 설명\\n"
+
+#: ../ldap_useradd:28
+msgid ""
+"    -d HOME_DIR      home directory [Default: /home/ldapusers/USERNAME]\\n"
+msgstr ""
+"    -d HOME_DIR      홈 디렉토리 [기본값: /home/ldapusers/USERNAME]\\n"
+
+#: ../ldap_useradd:29
+msgid "    -e EXPIRE_DATE   expiration date [Default: unlimit(0)]\\n"
+msgstr "    -e EXPIRE_DATE   계정 만료일 [기본값: 제한없음(0)]\\n"
+
+#: ../ldap_auth:29
+msgid "    -g               searching group\\n"
+msgstr "    -g               그룹 검색\\n"
+
+#: ../ldap_grpadd:28
+#, sh-format
+msgid "    -g GID           group id [biggern than ${MIN_GID}\\n"
+msgstr "    -g GID           그룹 ID [${MIN_GID} 보다 커야 함]\\n"
+
+#: ../ldap_auth:30 ../ldap_grpadd:31 ../ldap_grpdel:29 ../ldap_host_manage:29
+msgid "    -h               display this help message and exit\\n"
+msgstr "    -h               도움말 출력\\n"
+
+#: ../ldap_replica:29
+msgid "    -i               Server ID on this server [default: RAMDOM]\\n"
+msgstr "    -i               이 서버의 서버 ID [기본값: 무작위]\\n"
+
+#: ../ldap_grpadd:30 ../ldap_grpdel:28
+msgid "    -m MERBER_NAME   group member. enable multiple\\n"
+msgstr "    -m MEMBER_NAME   그룹 멤버. 복수 지정 가능\\n"
+
+#: ../ldap_ssl:33
+msgid "    -p PATH          private key\\n"
+msgstr "    -p PATH          개인키\\n"
+
+#: ../ldap_host_manage:28
+msgid "    -r               remove host\\n"
+msgstr "    -r               호스트 제거\\n"
+
+#: ../ldap_replica:30
+msgid "    -r               remove replication configuration on this server\\n"
+msgstr "    -r               이 서버의 리플리케이션 설정 제거"
+
+#: ../ldap_ssl:32
+msgid "    -r               remove ssl configuration on this server\\n"
+msgstr "    -r               이 서버의 SSL 설정 제거\\n"
+
+#: ../ldap_ssl:34
+msgid "    -s PATH          server certicate\\n"
+msgstr "    -s PATH          서버 인증서\\n"
+
+#: ../ldap_auth:31
+msgid "    -u               searching account [default option]\\n"
+msgstr "    -u               계정 검색 [기본 옵션]\\n"
+
+#: ../ldap_replica:31
+msgid "    -u USER_RDN      replication user dn\\n\\n"
+msgstr "    -u USER_RDN      리플리케이션 user dn\\n\\n"
+
+#: ../ldap_userdel:28
+msgid ""
+"    -y               None intercative mode [default: interactive mode]\\n"
+msgstr ""
+"    -y               비 대화식 모드 [기본: 대화식 모드]\\n"
+
+#: ../ldap_auth:32
+msgid "    -y               None intercative mode\\n\\n"
+msgstr "    -y               비 대화식 모드\\n\\n"
+
+#: ../ldap_grpadd:34 ../ldap_grpdel:32 ../ldap_host_manage:32
+#: ../ldap_userdel:31
+msgid "    FROMAT : ACCOUNT@DOMAIN_NAME\\n\\n"
+msgstr "    형식 : ACCOUNT@DOMAIN_NAME\\n\\n"
+
+#: ../ldap_replica:190
+#, sh-format
+msgid "    Replica Account         : ${OPT_USER}"
+msgstr ""
+
+#: ../ldap_replica:191
+#, sh-format
+msgid "    Replica BIND DN         : ${OPT_BIND}"
+msgstr ""
+
+#: ../ldap_replica:192
+#, sh-format
+msgid "    Replica Pre Test        : ${OPT_STATUS}"
+msgstr ""
+
+#: ../ldap_replica:193
+#, sh-format
+msgid "    Replica Server ID       : ${OPT_SRVID}"
+msgstr ""
+
+#: ../ldap_replica:194
+#, sh-format
+msgid "    Replica Target          : ${OPT_TARGET}"
+msgstr ""
+
+#: ../ldap_grpadd:35 ../ldap_grpdel:33 ../ldap_host_manage:33
+#: ../ldap_userdel:32
+msgid "    if base dn of LDAP is \"dc=DOMAIN,dc=COM\", domain name is \"DOMAIN.COM\".\\n"
+msgstr "    만약 LDAP base dn이 \"dc=DOMAIN,dc=COM\"이면, 도메인 이름은 \"DOMAIN.COM\" 입니다.\\n"
+
+#: ../ldap_auth:37
+msgid "    ldap_auth -g LDAP_GROUP@DOMAIN.COM\\n\\n"
+msgstr ""
+
+#: ../ldap_auth:39
+msgid "    ldap_auth -u LDAP_USER@DOMAIN.COM shadowMax 99999\\n\\n"
+msgstr ""
+
+#: ../ldap_auth:41
+msgid "    ldap_auth -u LDAP_USER@DOMAIN.COM shadowMax\\n"
+msgstr ""
+
+#: ../ldap_auth:35
+msgid "    ldap_auth -u LDAP_USER@DOMAIN.COM\\n\\n"
+msgstr ""
+
+#: ../ldap_grpadd:40
+msgid "    ldap_grpadd -g 10010 LDAP_GROUP@DOMAIN.COM\\n\\n"
+msgstr ""
+
+#: ../ldap_grpadd:42
+msgid "    ldap_grpadd -m member1 -m member2 LDAP_GROUP\\n"
+msgstr ""
+
+#: ../ldap_grpadd:38
+msgid "    ldap_grpadd LDAP_GROUP@DOMAIN.COM\\n\\n"
+msgstr ""
+
+#: ../ldap_grpdel:38
+msgid "    ldap_grpdel -m member1 -m member2 LDAP_GROUP\\n"
+msgstr ""
+
+#: ../ldap_grpdel:36
+msgid "    ldap_grpdel LDAP_GROUP@DOMAIN.COM\\n\\n"
+msgstr ""
+
+#: ../ldap_host_manage:38
+msgid "    ldap_host_manage -r LDAP_USER@DOMAIN.COM HOST\\n\\n"
+msgstr ""
+
+#: ../ldap_host_manage:36
+msgid "    ldap_host_manage LDAP_USER@DOMAIN.COM HOST\\n\\n"
+msgstr ""
+
+#: ../ldap_replica:33
+msgid ""
+"    ldap_replica -a -u uid=replica,ou=admin,dc=host,dc=com ldap.target.com\\n"
+msgstr ""
+
+#: ../ldap_replica:34
+msgid "    ldap_replica -r\\n\\n"
+msgstr ""
+
+#: ../ldap_useradd:53
+msgid "    ldap_useradd -i LDAP_USER@DOMAIN.COM\\n"
+msgstr ""
+
+#: ../ldap_useradd:51
+msgid "    ldap_useradd -n \\"
+msgstr ""
+
+#: ../ldap_useradd:49
+msgid "    ldap_useradd LDAP_USER@DOMAIN.COM\\n\\n"
+msgstr ""
+
+#: ../ldap_userdel:35
+msgid "    ldap_userdel LDAP_USER@DOMAIN.COM\\n\\n"
+msgstr ""
+
+#: ../ldap_auth_init:166
+msgid "   Input your BASE DN : "
+msgstr "   BASE DN 입력 : "
+
+#: ../ldap_auth_init:184
+msgid "   Input your ldap administrator password   "
+msgstr "   LDAP 관리자 암호 입력  "
+
+#: ../ldap_auth_init:186
+msgid "   Re-input your ldap administrator password"
+msgstr "   LDAP 관리자 암호 재입력"
+
+#: ../ldap_auth_init:205
+msgid "   Reault:"
+msgstr "   결과:"
+
+#: ../ldap_userdel:68
+#, sh-format
+msgid ""
+"  * Do you want to remove '${userid}' account ? [yes/${srYELLOW}no${sEND}] "
+msgstr ""
+"  * '${userid}' 계정을 삭제 하겠습니까? [yes/${srYELLOW}no${sEND}] "
+
+#: ../ldap_replica:471
+msgid "  ++ Current Replica config"
+msgstr "  ++ 현재 리플리케이션 설정"
+
+#: ../ldap_replica:208
+msgid " * 1. Regist sync module ... "
+msgstr " * 1. sync 모듈 등록 ... "
+
+#: ../ldap_replica:407
+msgid " * 1. Set Mirror mode ... "
+msgstr " * 1. 미러 모드 설정 ... "
+
+#: ../ldap_replica:432
+msgid " * 2. Remove replica server ... "
+msgstr " * 2. 리플리케이션 서버 제거 ... "
+
+#: ../ldap_replica:238
+msgid " * 2. Set Server ID ... "
+msgstr ""
+
+#: ../ldap_replica:287
+msgid " * 3. Set replica server ... "
+msgstr " * 3. 리플리케이션 서버 설정 ... "
+
+#: ../ldap_replica:342
+msgid " * 4. Set Mirror mode ... "
+msgstr " * 4. Mirror 모드 설정 ... "
+
+#: ../ldap_replica:375
+msgid " * 5. Set replica overlay ... "
+msgstr " * 5. 리플리케이션 오버레이 설정 ... "
+
+#: ../ldap_grpadd:179
+#, sh-format
+msgid " * Add additional member on ${OPT_GRPNAME} .. "
+msgstr " ${OPT_GRPNAME}에 추가 멤버 추가 .. "
+
+#: ../ldap_grpadd:114
+#, sh-format
+msgid " * Check group entry for '${OPT_GRPNAME}' .. "
+msgstr " * '${OPT_GRPNAME}'에 대한 그룹 엔트리 확인 .. "
+
+#: ../ldap_grpadd:139
+#, sh-format
+msgid " * Create ${OPT_GRPNAME} group entry .. "
+msgstr " ${OPT_GRPNAME} 그룹 엔트리 생성 .. "
+
+#: ../ldap_grpadd:176
+msgid " * No additional about memberUID attribute and exit this program"
+msgstr " * 추가할 memberUID 속성이 없습니다. 이 프로그램을 종료 합니다."
+
+#: ../ldap_grpdel:105
+#, sh-format
+msgid " * Remove '${OPT_GRPNAME}' member '${member}' .. "
+msgstr " * '${OPT_GRPNAME}'의 '${member}' 삭제 .. "
+
+#: ../ldap_grpdel:92
+#, sh-format
+msgid " * Remove group '${OPT_GRPNAME}' .. "
+msgstr " * '${OPT_GRPNAME}' 그룹 삭제 .. "
+
+#: ../ldap_grpadd:129 ../ldap_grpadd:159
+#, sh-format
+msgid " * check additional member '${member}' .. "
+msgstr " * 추가 멤버 '${member}' 확인 .. "
+
+#: ../ldap_ssl:202 ../ldap_ssl:223
+msgid " Please restart slapd daemon!"
+msgstr "slapd 데몬을 재시작 하십시오!"
+
+#: ../ldap_ssl:100
+#, sh-format
+msgid " create ${OPT_PKEY}"
+msgstr ""
+
+#: ../ldap_ssl:136
+#, sh-format
+msgid " create ${OPT_SCRT}"
+msgstr ""
+
+#: ../ldap_ssl:121
+#, sh-format
+msgid " create ${OPT_SCSR}"
+msgstr ""
+
+#: ../ldap_ssl:93 ../ldap_ssl:134
+#, sh-format
+msgid "${OPT_PKEY} create .. "
+msgstr "${OPT_PKEY} 생성 .. "
+
+#: ../ldap_auth_init:24
+msgid "1. Installation ldap packages"
+msgstr "1. ldap 패키지 설치"
+
+#: ../ldap_auth_init:96
+msgid "2. syslog configuration"
+msgstr "2. syslog 설정"
+
+#: ../ldap_auth_init:142
+msgid "3. SLAPD configuration and start"
+msgstr "3. SLAPD 설정 및 구동"
+
+#: ../ldap_auth_init:162
+msgid "4. Order your BASE Information"
+msgstr "4.기본 정보 설정"
+
+#: ../ldap_auth_init:215
+msgid "5. Settings BASE DN"
+msgstr "5. BASE DN 설정"
+
+#: ../ldap_auth_init:252
+msgid "6. Settings Admin password"
+msgstr "6. 어드민 암호 설정"
+
+#: ../ldap_auth_init:274
+msgid "7. Initial Directory Information Tree"
+msgstr "7. 기본 트리 구조 초기화"
+
+#: ../ldap_auth_init:307
+msgid "8. Create default groups"
+msgstr "8. 기본 그룹 생성"
+
+#: ../ldap_auth_init:431
+msgid "9. LDAP default Settings"
+msgstr "9. LDAP 기본 설정"
+
+#: ../ldap_replica:293
+msgid "Already set replica config!"
+msgstr "이미 리플리케이션 설정이 되어 있습니다."
+
+#: ../ldap_replica:247
+#, sh-format
+msgid "Already set server id to ${SRVID}"
+msgstr "서버 ID가 이미 ${SRVID}으로 설정 되어 있습니다."
+
+#: ../ldap_replica:400
+msgid "Complete configuration."
+msgstr "설정 완료"
+
+#: ../ldap_auth:139
+#, sh-format
+msgid "Error: '${OPT_DN}' attribute can not be managed!!\\n"
+msgstr "에러: '${OPT_DN}' 속성은 관리 대상이 아닙니다!\\n"
+
+#: ../ldap_auth:128
+#, sh-format
+msgid "Error: '${OPT_DN}' attribute can not be modified!!\\n"
+msgstr "에러: ${OPT_DN}' 속성은 수정할 수 없습니다!\\n"
+
+#: ../ldap_auth:175
+#, sh-format
+msgid "Error: '${OPT_DN}' attribute is bigger than ${OPT_CHK}\\n"
+msgstr "에러: '${OPT_DN}' 속성은 ${OPT_CHK} 보다 커야 합니다.\\n"
+
+#: ../ldap_grpdel:88
+#, sh-format
+msgid "Error: '${OPT_GRPNAME}' group is not found!\\n"
+msgstr "에러: '${OPT_GRPNAME}' 그룹을 찾을 수 없습니다.\\n"
+
+#: ../ldap_host_manage:178
+#, sh-format
+msgid "Error: '${OPT_HOST}' is already regist!\\n"
+msgstr "에러: ${OPT_HOST}' 호스트는 이미 등록되어 있습니다.\\n"
+
+#: ../ldap_host_manage:104
+#, sh-format
+msgid "Error: '${OPT_HOST}' is not regist!\\n"
+msgstr "에러: '${OPT_HOST}'는 등록되어 있지 않습니다!\\n"
+
+#: ../ldap_host_manage:174
+#, sh-format
+msgid "Error: '${OPT_USERID}' already has access privileges about all host!\\n"
+msgstr "에러: '${OPT_USERID}' 계정은 이미 모든 호스트에서의 접근이 가능합니다.\\n"
+
+#: ../ldap_useradd:230
+msgid "Error: -l option doesn't set!\\n\\n"
+msgstr "에러: -l 옵션이 주어지지 않았습니다.\\n\\n"
+
+#: ../ldap_useradd:229
+msgid "Error: -n option doesn't set!\\n\\n"
+msgstr "에러: -n 옵션이 주어지지 않았습니다.\\n\\n"
+
+#: ../ldap_useradd:239
+msgid "Error: -p (password) options doesn't set!\\n\\n"
+msgstr "에러: -p (암호) 옵션이 주어지지 않았습니다.\\n\\n"
+
+#: ../ldap_host_manage:80
+#, sh-format
+msgid "Error: Account '${OPT_USERID}' is not found!!!\\n"
+msgstr "에러: '${OPT_USERID}' 계정을 찾을 수 없습니다!!\\b"
+
+#: ../ldap_auth:169
+#, sh-format
+msgid "Error: Can't found ${OPT_DN} attribute\\n"
+msgstr "에러: ${OPT_DN} 속성을 찾을 수 없습니다.\\n"
+
+#: ../ldap_auth:102
+#, sh-format
+msgid "Error: Can't found '${OPT_USERID}@${OPT_DOMAIN}' entry\\n"
+msgstr "에러: '${OPT_USERID}@${OPT_DOMAIN}' 엔트리를 찾을 수 없습니다.\\n"
+
+#: ../ldap_host_manage:167
+msgid "Error: Failed add 'hostObject' object class!"
+msgstr "에러: 'hostObject' object class 추가 실패!"
+
+#: ../ldap_host_manage:189
+#, sh-format
+msgid "Error: Failed add host attrubute '${OPT_HOST}'!"
+msgstr "에러: '${OPT_HOST}' 호스트 속성 추가 실패!"
+
+#: ../ldap_host_manage:153
+msgid "Error: Failed regist hostObject schem!"
+msgstr "에러: hostObject 스키마 등록 실패!"
+
+#: ../ldap_replica:133
+msgid "Error: The options -a can not use with -r\\n"
+msgstr "에러: -a 옵션과 -r 옵션은 같이 사용할 수 없습니다.\\n"
+
+#: ../ldap_ssl:57 ../ldap_ssl:61 ../ldap_ssl:68
+msgid "Error: The options -a, -c, -r can't use combination\\n"
+msgstr "에러: -a, -c, -r 옵션은 같이 사용할 수 없습니다.\\n"
+
+#: ../ldap_replica:141
+msgid "Error: The options -r can not use with -a\\n"
+msgstr "에러: -r 옵션은 -a 옵션과 같이 사용할 수 없습니다.\\n"
+
+#: ../ldap_useradd:111
+#, sh-format
+msgid "Error: The value of -g option is bigger than ${MIN_GID}\\n"
+msgstr "에러: -g 옵션값은 ${MIN_GID}보다 커야 합니다.\\n"
+
+#: ../ldap_grpadd:98
+#, sh-format
+msgid "Error: The value of -g option is bigger than ${MIN_UID}\\n"
+msgstr "에러: -g 옵션값은 ${MIN_UID} 보다 커야 합니다.\\n"
+
+#: ../ldap_useradd:110
+msgid "Error: The value of -g option is must numeric\\n"
+msgstr "에러: -g 옵션값은 숫자여야 합니다.\\n"
+
+#: ../ldap_useradd:126
+#, sh-format
+msgid "Error: The value of -u option is bigger than ${MIN_UID}\\n"
+msgstr "에러: -u 옵션값은 ${MIN_UID}보다 커야 합니다.\\n"
+
+#: ../ldap_useradd:125
+msgid "Error: The value of -u option is must numeric\\n"
+msgstr "에러: -u 옵션값은 숫자여야 합니다.\\n"
+
+#: ../ldap_useradd:281
+msgid "Error: Unsupported password scheme.\\n"
+msgstr "에러: 지원하지 않는 암호 스키마\\n"
+
+#: ../ldap_ssl:218
+msgid "Error: failed remove ssl configurations\\n"
+msgstr "에러: SSL 설정 삭제 실패\\n"
+
+#: ../ldap_host_manage:91
+msgid "Error: host attribute is not regist!\\n"
+msgstr "에러: host 속성을 등록하지 못했습니다!\\n"
+
+#: ../ldap_auth:143
+#, sh-format
+msgid "Error: invalid '${OPT_DN}' values!\\n"
+msgstr "에러: '${OPT_DN}' 값은 잘못된 형식 입니다!\\n"
+
+#: ../ldap_grpadd:88 ../ldap_grpdel:69
+#, sh-format
+msgid "Error: invalide GROUPNAME '${OPT_USERID}'\\n"
+msgstr "에러: '${OPT_USERID}' GROUPNAME은 잘못된 형식입니다.\\n"
+
+#: ../ldap_auth:82 ../ldap_host_manage:69 ../ldap_useradd:152
+#, sh-format
+msgid "Error: invalide USERNAME '${OPT_USERID}'\\n"
+msgstr "에러: '${OPT_USERID}' USERNAME은 잘못된 형식입니다.\\n"
+
+#: ../ldap_auth:187
+#, sh-format
+msgid "Errot: '${OPT_DN}' ${OPT_DNV} is duplicaed!\\n"
+msgstr "에러:'${OPT_DN}' ${OPT_DNV} 값은 중복된 값입니다.\\n"
+
+#: ../ldap_replica:32
+msgid "Example\\n"
+msgstr "예제\\n"
+
+#: ../functions.in:140
+msgid "Failure"
+msgstr ""
+
+#: ../ldap_grpadd:33 ../ldap_grpdel:31
+msgid "GROUPNAME format\\n"
+msgstr "GROUPNAME 형식\\n"
+
+#: ../ldap_useradd:221
+msgid "Input access host [Default: none]       "
+msgstr "접근 허가 호스트 입력 [기본: 없음]      "
+
+#: ../ldap_useradd:213
+msgid "Input additional group [Default: none]  "
+msgstr "추가 그룹 입력 [기본: 없음]             "
+
+#: ../ldap_useradd:244
+msgid "Input password                          "
+msgstr "암호 입력                               "
+
+#: ../ldap_replica:179
+msgid "Invalid access privileges"
+msgstr "잘못된 접근 권한"
+
+#: ../ldap_auth:157
+#, sh-format
+msgid "Is right upper informations? [Y/${srYELLOW}N${sEND}] "
+msgstr "위의 정보가 맞습니까? [Y/${srYELLOW}N${sEND}] "
+
+#: ../ldap_replica:201
+msgid "Is right your information? [Y/N]"
+msgstr "이 정보가 맞습니까? [Y/N]"
+
+#: ../ldap_ssl:127
+msgid "Make Self signed certificate"
+msgstr "자체 사인 인증서 생성"
+
+#: ../ldap_ssl:110
+msgid "Make Server key"
+msgstr "서버키 생성"
+
+#: ../ldap_ssl:84
+msgid "Make private key"
+msgstr "개인키 생성"
+
+#: ../functions.in:134
+msgid "OK"
+msgstr ""
+
+#: ../ldap_auth:27 ../ldap_grpadd:27 ../ldap_grpdel:27 ../ldap_host_manage:27
+#: ../ldap_replica:27 ../ldap_ssl:27 ../ldap_useradd:27 ../ldap_userdel:27
+msgid "Options:\\n"
+msgstr "옵션:\\n"
+
+#: ../ldap_useradd:177
+msgid "Password entry GECOS                    "
+msgstr "passwd GECOS 엔트리                     "
+
+#: ../ldap_useradd:259
+msgid "Re-input password                       "
+msgstr "암호 재입력                             "
+
+#: ../ldap_ssl:201
+msgid "Regist success"
+msgstr "등록 성공"
+
+#: ../ldap_ssl:98
+#, sh-format
+msgid "Remove password on ${OPT_PKEY} .. "
+msgstr "${OPT_PKEY}의 암호 제거 ..        "
+
+#: ../ldap_ssl:222
+msgid "Remove success"
+msgstr "삭제 성공"
+
+#: ../ldap_useradd:206
+msgid "Set Expire Date [Default: 0(unlimited)] "
+msgstr "계정 만기일 설정 [기본값: 0(제한없음)]  "
+
+#: ../ldap_useradd:194
+msgid "Set GID [Default: 10000(ldapusers)]     "
+msgstr "GID 설정 [기본값: 10000(ldapusers)]     "
+
+#: ../ldap_useradd:204
+#, sh-format
+msgid "Set Home Directory [Default: ${OPT_HOME}] "
+msgstr "홈 디렉토리 설정 [Default: ${OPT_HOME}]   "
+
+#: ../ldap_useradd:208
+msgid "Set Shell [Default: /bin/bash]          "
+msgstr "쉘 설정 [Default: /bin/bash]            "
+
+#: ../ldap_useradd:182
+#, sh-format
+msgid "Set UID [Default: ${OPT_UID}]                "
+msgstr "UID 설정 [기본값: ${OPT_UID}]                "
+
+#: ../ldap_replica:458
+msgid "This server is not set replica configuration!"
+msgstr "이 서버는 replication 설정이 되어 있지 않습니다!"
+
+#: ../ldap_host_manage:31 ../ldap_userdel:30
+msgid "USERNAME format\\n"
+msgstr "USERNAME 형식\\n"
+
+#: ../ldap_auth:26
+msgid ""
+"Usage: ldap_auth [OPTIONS] {USER|GROUP}@DOMAIN.COM[ ENTRY "
+"MODIFIED_ENTRY_VALUE]\\n"
+msgstr ""
+"사용법: ldap_auth [OPTIONS] {USER|GROUP}@DOMAIN.COM[ ENTRY "
+"MODIFIED_ENTRY_VALUE]\\n"
+
+#: ../ldap_grpadd:26
+msgid "Usage: ldap_grpadd [OPTIONS] GROUPNAME\\n"
+msgstr "사용법: ldap_grpadd [OPTIONS] GROUPNAME\\n"
+
+#: ../ldap_grpdel:26
+msgid "Usage: ldap_grpdel [OPTIONS] GROUPNAME\\n"
+msgstr "사용법: ldap_grpdel [OPTIONS] GROUPNAME\\n"
+
+#: ../ldap_host_manage:26
+msgid "Usage: ldap_host_manage [OPTIONS] USERNAME HOST1\\n"
+msgstr "사용법: ldap_host_manage [OPTIONS] USERNAME HOST1\\n"
+
+#: ../ldap_replica:26
+msgid "Usage: ldap_replica [OPTIONS] REPLICA_SERVER\\n"
+msgstr "사용법: ldap_replica [OPTIONS] REPLICA_SERVER\\n"
+
+#: ../ldap_ssl:26
+msgid "Usage: ldap_ssl [OPTIONS]\\n"
+msgstr "사용법: ldap_ssl [OPTIONS]\\n"
+
+#: ../ldap_useradd:26
+msgid "Usage: ldap_useradd [OPTIONS] USERNAME\\n"
+msgstr "사용법: ldap_useradd [OPTIONS] USERNAME\\n"
+
+#: ../ldap_userdel:26
+msgid "Usage: ldap_userdel [OPTIONS] USERNAME ...\\n"
+msgstr "사용법: ldap_userdel [OPTIONS] USERNAME ...\\n"
+
+#: ../ldap_useradd:173
+msgid "Your Given Name                         "
+msgstr "이름(성 제외)                           "
+
+#: ../ldap_replica:188
+msgid "Your Informations:"
+msgstr "설정 정보:"
+
+#: ../ldap_useradd:232
+msgid "Your Name    "
+msgstr "이름         "
+
+#: ../ldap_useradd:233
+msgid "Your Surname "
+msgstr "성           "
+
+#: ../ldap_useradd:175
+msgid "Your Surname                            "
+msgstr "성                                      "
+
+#: ../ldap_grpadd:32 ../ldap_grpdel:30 ../ldap_host_manage:30
+#: ../ldap_userdel:29
+msgid "\\n"
+msgstr ""
+
+#: ../ldap_useradd:164
+#, sh-format
+msgid "\\nError: ${OPT_USERID} is already exists!!!\\n\\n"
+msgstr "\\n에러: ${OPT_USERID}는 이미 존재합니다.\\n\\n"
+
+#: ../ldap_replica:164
+msgid "\\nError: REPLICA user dn format error!\\n\\n"
+msgstr "\\n에러: 잘못된 REPLICA user dn 형식!\\n\\n"
+
+#: ../ldap_auth:33
+msgid "\\nExamples:\\n"
+msgstr "\\n예제:\\n"
+
+#: ../ldap_grpadd:119
+msgid "already exists"
+msgstr "이미 존재함"
+
+#: ../ldap_grpadd:167
+msgid "already exists. skip"
+msgstr "이미 존재함. 건너띔"
+
+#: ../ldap_ssl:105 ../ldap_ssl:141
+msgid "already exsist"
+msgstr "이미 존재함"
+
+#: ../ldap_replica:272
+#, sh-format
+msgid "already set ${SRVID}"
+msgstr "이미 ${SRVID} 설정 되어 있음"
+
+#: ../ldap_auth:25
+msgid "ldap_auth: managed user or group attributes\\n"
+msgstr "ldap_auth: user 또는 group 속성 관리\\n"
+
+#: ../ldap_grpadd:25
+msgid "ldap_grpadd: Add group to LDAP database\\n"
+msgstr "ldap_grpadd: LDAP 데이터베이스에 group 추가\\n"
+
+#: ../ldap_grpdel:25
+msgid "ldap_grpdel: Remove group on LDAP database\\n"
+msgstr "ldap_grpdel: LDAP 데이터베이스에서 group 삭제\\n"
+
+#: ../ldap_host_manage:25
+msgid "ldap_host_manage: managed host access privileges\\n"
+msgstr "ldap_host_manage: 호스트 접근 권한 설정 관리\\n"
+
+#: ../ldap_replica:25
+msgid "ldap_replica: management ldap 2way multi master replication\\n"
+msgstr "ldap_replica: LDAP 2way multi master replication 관리\\n"
+
+#: ../ldap_ssl:25
+msgid "ldap_ssl: management ssl on ldap server\\n"
+msgstr "ldap_ssl: LDAP 서버 SSL 설정 관리\\n"
+
+#: ../ldap_useradd:25
+msgid "ldap_useradd: Add user to LDAP database\\n"
+msgstr "ldap_useradd: LDAP 데이터베이스에 user 추가\\n"
+
+#: ../ldap_userdel:25
+msgid "ldap_userdel: Remove user on LDAP database\\n"
+msgstr "ldap_userdel: LDAP 데이터베이스에서 user 삭제\\n"
+
+#: ../ldap_grpdel:107
+msgid "no exists"
+msgstr "존재하지 않음"
+
+#: ../ldap_grpadd:131 ../ldap_grpadd:161
+msgid "no exists. skip!"
+msgstr "존재하지 않음. 건너띔!"
+
+#: ../ldap_replica:232
+msgid "regist failed"
+msgstr "등록 실패"
+
+#: ../ldap_grpadd:121
+msgid "will create"
+msgstr "등록 진행 중"

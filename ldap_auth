@@ -22,23 +22,23 @@
 source "@datadir@/functions"
 
 help() {
-	stderr "ldap_auth: managed user or group attributes\n"
-	stderr "Usage: ldap_auth [OPTIONS] {USER|GROUP}@DOMAIN.COM[ ENTRY MODIFIED_ENTRY_VALUE]\n"
-	stderr "Options:\n"
-	stderr "    -d               permit modify duplicated uidNumber/gidNumber\n"
-	stderr "    -g               searching group\n"
-	stderr "    -h               display this help message and exit\n"
-	stderr "    -u               searching account [default option]\n"
-	stderr "    -y               None intercative mode\n\n"
-	stderr "\nExamples:\n"
-	stderr "    # View information LDAP_USER with BASE DN 'dc=DOMAIN,dc=COM'\n"
-	stderr "    ldap_auth -u LDAP_USER@DOMAIN.COM\n\n"
-	stderr "    # View information LDAP_GROUP with BASE DN 'dc=DOMAIN,dc=COM\n"
-	stderr "    ldap_auth -g LDAP_GROUP@DOMAIN.COM\n\n"
-	stderr "    # set or modify attribute on LDAP_USER with BASE DN 'dc=DOMAIN,dc=COM'\n"
-	stderr "    ldap_auth -u LDAP_USER@DOMAIN.COM shadowMax 99999\n\n"
-	stderr "    # remove attribute on LDAP_USER with BASE DN 'dc=DOMAIN,dc=COM'\n"
-	stderr "    ldap_auth -u LDAP_USER@DOMAIN.COM shadowMax\n"
+	stderr $"ldap_auth: managed user or group attributes\n"
+	stderr $"Usage: ldap_auth [OPTIONS] {USER|GROUP}@DOMAIN.COM[ ENTRY MODIFIED_ENTRY_VALUE]\n"
+	stderr $"Options:\n"
+	stderr $"    -d               permit modify duplicated uidNumber/gidNumber\n"
+	stderr $"    -g               searching group\n"
+	stderr $"    -h               display this help message and exit\n"
+	stderr $"    -u               searching account [default option]\n"
+	stderr $"    -y               None intercative mode\n\n"
+	stderr $"\nExamples:\n"
+	stderr $"    # View information LDAP_USER with BASE DN 'dc=DOMAIN,dc=COM'\n"
+	stderr $"    ldap_auth -u LDAP_USER@DOMAIN.COM\n\n"
+	stderr $"    # View information LDAP_GROUP with BASE DN 'dc=DOMAIN,dc=COM\n"
+	stderr $"    ldap_auth -g LDAP_GROUP@DOMAIN.COM\n\n"
+	stderr $"    # set or modify attribute on LDAP_USER with BASE DN 'dc=DOMAIN,dc=COM'\n"
+	stderr $"    ldap_auth -u LDAP_USER@DOMAIN.COM shadowMax 99999\n\n"
+	stderr $"    # remove attribute on LDAP_USER with BASE DN 'dc=DOMAIN,dc=COM'\n"
+	stderr $"    ldap_auth -u LDAP_USER@DOMAIN.COM shadowMax\n"
 	exit 1
 }
 
@@ -79,7 +79,7 @@ done
 OPT_USERID="$1"
 set_basedn_by_domain "${OPT_USERID}"
 [ $? -ne 0 ] && \
-	stderr "Error: invalide USERNAME '${OPT_USERID}'\n" && help
+	stderr $"Error: invalide USERNAME '${OPT_USERID}'\n" && help
 
 USER_SCHEME="ou=${USER_DN},${BASEDN}"
 GROUP_SCHEME="ou=${GROUP_DN},${BASEDN}"
@@ -99,7 +99,7 @@ BUF="$(${cmd_ldapsearch} ${LDAB_PRIV} -b "${SEARCH_DN}"  "${FILTERS}" 2> /dev/nu
 echo "${BUF}" | ${cmd_grep} "# numEntries: " >& /dev/null
 
 if [ $? -ne 0 ]; then
-	stderr "Error: Can't found '${OPT_USERID}@${OPT_DOMAIN}' entry\n"
+	stderr $"Error: Can't found '${OPT_USERID}@${OPT_DOMAIN}' entry\n"
 	exit 1
 fi
 
@@ -125,7 +125,7 @@ OPT_DNV="$*"
 # DN list that can not modify
 blockdn=':objectClass:dn:uid:cn:shadowLastChange:userPassword:'
 echo "${blockdn}" | ${cmd_grep} ":${OPT_DN}:" >& /dev/null
-[ $? -eq 0 ] && stderr "Error: '${OPT_DN}' attribute can not be modified!!\n" && exit 1
+[ $? -eq 0 ] && stderr $"Error: '${OPT_DN}' attribute can not be modified!!\n" && exit 1
 
 if [ ${OPT_MODE} -eq 0 ]; then
 	blockdn=":host:"
@@ -136,11 +136,11 @@ else
 fi
 echo "${blockdn}" | ${cmd_grep} ":${OPT_DN}:" >& /dev/null
 [ $? -eq 0 ] && \
-	stderr "Error: '${OPT_DN}' attribute can not be managed!!\n" && \
-	stderr "        ${errmsg}\n" && exit 1
+	stderr $"Error: '${OPT_DN}' attribute can not be managed!!\n" && \
+	stderr $"        ${errmsg}\n" && exit 1
 
 [ -z "${OPT_DNV}" ] && \
-	stderr "Error: invalid '${OPT_DN}' values!\n" && exit 1
+	stderr $"Error: invalid '${OPT_DN}' values!\n" && exit 1
 
 ${cmd_cat} <<EOF
 
@@ -154,7 +154,7 @@ Your inforamtions:
 EOF
 
 if [ ${OPT_INT} -eq 0 ]; then
-	prompt_def 'N' "Is right upper informations? [Y/${srYELLOW}N${sEND}] "
+	prompt_def 'N' $"Is right upper informations? [Y/${srYELLOW}N${sEND}] "
 	prompt_value="${prompt_value^^}"
 	[ "${prompt_value}" != "Y" ] && exit 0
 fi
@@ -166,13 +166,13 @@ else
 	RDN="cn=${OPT_USERID},${SEARCH_DN}"
 	check_group_attribute "${OPT_USERID}" "${OPT_DN}"
 fi
-[ $? -eq 1 ] && stderr "Error: Can't found ${OPT_DN} attribute\n" && exit 1
+[ $? -eq 1 ] && stderr $"Error: Can't found ${OPT_DN} attribute\n" && exit 1
 
 UOPT_DN=${OPT_DN^^}
 if [ "${UOPT_DN}" = "GIDNUMBER" -o "${UOPT_DN}" = "UIDNUMBER" ]; then
 	[ "${UOPT_DN}" = "UIDNUMBER" ] && OPT_CHK=${MIN_UID} || OPT_CHK=${MIN_GID}
 	[ ${OPT_DNV} -lt ${OPT_CHK} ] && \
-		stderr "Error: '${OPT_DN}' attribute is bigger than ${OPT_CHK}\n" && \
+		stderr $"Error: '${OPT_DN}' attribute is bigger than ${OPT_CHK}\n" && \
 		exit 1
 
 	if [ "${UOPT_DN}" = "UIDNUMBER" ]; then
@@ -184,8 +184,8 @@ if [ "${UOPT_DN}" = "GIDNUMBER" -o "${UOPT_DN}" = "UIDNUMBER" ]; then
 	fi
 
 	[ ${RET} -eq 0 -a ${OPT_DUP} -eq 0 ] && \
-		stderr "Errot: '${OPT_DN}' ${OPT_DNV} is duplicaed!\n" && \
-		stderr "       If you want to this value, use -d option\n" && exit 1
+		stderr $"Errot: '${OPT_DN}' ${OPT_DNV} is duplicaed!\n" && \
+		stderr $"       If you want to this value, use -d option\n" && exit 1
 fi
 
 

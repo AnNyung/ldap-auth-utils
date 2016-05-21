@@ -22,20 +22,20 @@
 source "@datadir@/functions"
 
 help() {
-	stderr "ldap_grpdel: Remove group on LDAP database\n"
-	stderr "Usage: ldap_grpdel [OPTIONS] GROUPNAME\n"
-	stderr "Options:\n"
-	stderr "    -m MERBER_NAME   group member. enable multiple\n"
-	stderr "    -h               display this help message and exit\n"
-	stderr "\n"
-	stderr "GROUPRNAME format\n"
-	stderr "    FROMAT : ACCOUNT@DOMAIN_NAME\n\n"
-	stderr "    if base dn of LDAP is \"dc=DOMAIN,dc=COM\", domain name is \"DOMAIN.COM\".\n"
-	stderr "\nExamples:\n"
-	stderr "    # remove LDAP_GROUP with BASE DN 'dc=DOMAIN,dc=COM'\n"
-	stderr "    ldap_grpdel LDAP_GROUP@DOMAIN.COM\n\n"
-	stderr "    # remove member of LDAP_GROUP@DOMAIN.COM\n"
-	stderr "    ldap_grpdel -m member1 -m member2 LDAP_GROUP\n"
+	stderr $"ldap_grpdel: Remove group on LDAP database\n"
+	stderr $"Usage: ldap_grpdel [OPTIONS] GROUPNAME\n"
+	stderr $"Options:\n"
+	stderr $"    -m MERBER_NAME   group member. enable multiple\n"
+	stderr $"    -h               display this help message and exit\n"
+	stderr $"\n"
+	stderr $"GROUPNAME format\n"
+	stderr $"    FROMAT : ACCOUNT@DOMAIN_NAME\n\n"
+	stderr $"    if base dn of LDAP is \"dc=DOMAIN,dc=COM\", domain name is \"DOMAIN.COM\".\n"
+	stderr $"\nExamples:\n"
+	stderr $"    # remove LDAP_GROUP with BASE DN 'dc=DOMAIN,dc=COM'\n"
+	stderr $"    ldap_grpdel LDAP_GROUP@DOMAIN.COM\n\n"
+	stderr $"    # remove member of LDAP_GROUP@DOMAIN.COM\n"
+	stderr $"    ldap_grpdel -m member1 -m member2 LDAP_GROUP\n"
 	exit 1
 }
 
@@ -66,7 +66,7 @@ done
 OPT_GRPNAME="$1"
 set_basedn_by_domain "${OPT_GRPNAME}"
 [ $? -ne 0 ] && \
-	stderr "Error: invalide GROUPNAME '${OPT_USERID}'\n" && help
+	stderr $"Error: invalide GROUPNAME '${OPT_USERID}'\n" && help
 [ -n "${OPT_USERID}" ] && OPT_GRPNAME="${OPT_USERID}"
 
 USER_SCHEME="ou=${USER_DN},${BASEDN}"
@@ -85,11 +85,11 @@ EOF
 check_group_exists ${OPT_GRPNAME}
 RET=$?
 
-[ ${RET} -ne 0 ] && stderr "Error: '${OPT_GRPNAME}' group is not found!\n" && exit 1
+[ ${RET} -ne 0 ] && stderr $"Error: '${OPT_GRPNAME}' group is not found!\n" && exit 1
 
 if [ -z "${OPT_MEMBERS}" ]; then
 	# remove group
-	echo -n " * Remove group '${OPT_GRPNAME}' .. "
+	echo -n $" * Remove group '${OPT_GRPNAME}' .. "
 	REMOVE_DN="cn=${OPT_GRPNAME},${GROUP_SCHEME}"
 	${cmd_ldapdelete} ${LDAP_PRIV} "${REMOVE_DN}" >& /dev/null
 	RET=$?
@@ -102,9 +102,9 @@ fi
 
 for member in ${OPT_MEMBERS}
 do
-	echo -n " * Remove '${OPT_GRPNAME}' member '${member}' .. "
+	echo -n $" * Remove '${OPT_GRPNAME}' member '${member}' .. "
 	check_group_member "${OPT_GRPNAME}" "${member}"
-	[ $? -ne 0 ] && failure "no exists" && echo && continue
+	[ $? -ne 0 ] && failure $"no exists" && echo && continue
 
 	${cmd_ldapmodify} ${LDAP_PRIV} <<EOF >& /dev/null
 dn: cn=${OPT_GRPNAME},${GROUP_SCHEME}

@@ -31,7 +31,9 @@ all:
 		$(SED) -e "s!@1\?datadir@!$(datadir)/ldap-auth-utils!g" $$i > $(WORKDIR)/$$i ; \
 	done
 
-install: install-man
+	$(MAKE) -C po
+
+install: install-man install-po
 	$(MKDIR) $(DESTDIR)$(sbindir)
 	$(MKDIR) $(DESTDIR)$(sysconfdir)
 	$(MKDIR) $(DESTDIR)$(datadir)/ldap-auth-utils
@@ -44,11 +46,16 @@ install: install-man
 	$(INSTALL) -m 644 functions $(DESTDIR)$(datadir)/ldap-auth-utils/functions;
 	$(INSTALL) -m 644 config.sed $(DESTDIR)$(datadir)/ldap-auth-utils/config.sed;
 
+install-po:
+	$(MAKE) -C po DESTDIR=$(DESTDIR) install
+
 install-man:
 	$(MAKE) -C man
 
 clean:
 	$(RM) -rf $(WORKDIR) config.log config.status
+	$(MAKE) -C po clean
 
 distclean: clean
 	$(RM) -rf Makefile config.h ldap_passwd functions *~ autom4te.cache
+	$(RM) -rf */Makefile

@@ -21,7 +21,7 @@
 
 source "@datadir@/functions"
 
-echo "1. Installation ldap packages"
+echo $"1. Installation ldap packages"
 echo
 echo
 
@@ -93,7 +93,7 @@ echo
 
 
 echo
-echo "2. syslog configuration"
+echo $"2. syslog configuration"
 
 FNAME="/etc/rsyslog.d/slapd.conf"
 printf "   . %-60s ... " "${FNAME}"
@@ -139,7 +139,7 @@ echo
 
 
 echo
-echo "3. SLAPD configuration and start"
+echo $"3. SLAPD configuration and start"
 
 FNAME="/etc/sysconfig/ldap"
 printf "   . %-60s ... " "${FNAME}"
@@ -159,11 +159,11 @@ echo
 
 
 
-echo "4. Order your BASE Information"
+echo $"4. Order your BASE Information"
 
 while [ -z "${opt}" ]
 do
-	echo -n "   Input your BASE DN : "
+	echo -n $"   Input your BASE DN : "
 	read opt
 
 	if [ -n "${opt}" ]; then
@@ -181,18 +181,18 @@ BASEUP="${BASE^^}"
 opt=""
 while [ -z "${opt}" ]
 do
-	passwd_prompt "   Input your ldap administrator password   "
+	passwd_prompt $"   Input your ldap administrator password   "
 	opt=$prompt_value
-	passwd_prompt "   Re-input your ldap administrator password"
+	passwd_prompt $"   Re-input your ldap administrator password"
 	opt1=$prompt_value
 
 	if [ -n "${opt}" -a -n "${opt1}" ]; then
 		if [ "${opt}" != "${opt1}" ]; then
-			echo "     .. passwords doesn't match!"
+			echo $"     .. passwords doesn't match!"
 			opt=""
 		fi
 	else
-		echo "     .. passwords doesn't match!"
+		echo $"     .. passwords doesn't match!"
 		opt=""
 	fi
 done
@@ -202,7 +202,7 @@ ROOTPW=$(slappasswd -s "${opt}")
 
 
 echo
-echo "   Reault:"
+echo $"   Reault:"
 echo "           BASE           => ${BASE}"
 echo "           BASE DN        => ${BASEDN}"
 echo "           ADMIN Password => ${ROOTPPW}"
@@ -212,7 +212,7 @@ echo
 
 
 echo
-echo "5. Settings BASE DN"
+echo $"5. Settings BASE DN"
 
 for file in /etc/openldap/slapd.d/cn\=config/olcDatabase*
 do
@@ -249,7 +249,7 @@ echo
 
 
 echo
-echo "6. Settings Admin password"
+echo $"6. Settings Admin password"
 
 ${cmd_cat} <<EOF | ${cmd_ldapmodify} ${LADP_PRIV} >& /dev/stdout | ${cmd_sed} 's/^/   /g' | ${cmd_grep} -v "^[ ]*$"
 dn: olcDatabase={0}config,cn=config
@@ -271,7 +271,7 @@ ${cmd_perl} -pi -e 's/\@RDN\@/cn=Manager,${BASEDN}/g' ${confdir}/ldap-auth-utils
 
 
 echo
-echo "7. Initial Directory Information Tree"
+echo $"7. Initial Directory Information Tree"
 
 #
 # use CN=manager privileges for confirm Manager privileges
@@ -304,7 +304,7 @@ echo
 
 
 echo
-echo "8. Create default groups"
+echo $"8. Create default groups"
 
 ${cmd_cat} <<EOF | ${cmd_ldapadd} -a -c ${LDAP_PRIV} | ${cmd_sed} 's/^/   /g' | ${cmd_grep} -v "^[ ]*$"
 # extended LDIF
@@ -428,7 +428,7 @@ echo
 
 
 echo
-echo "9. LDAP default Settings"
+echo $"9. LDAP default Settings"
 
 ${cmd_cat} <<EOF | ${cmd_ldapmodify} ${LDAP_PRIV} | ${cmd_sed} 's/^/   /g' | ${cmd_grep} -v "^[ ]*$"
 dn: olcDatabase={-1}frontend,cn=config

@@ -22,16 +22,16 @@
 source "@datadir@/functions"
 
 help() {
-	stderr "ldap_replica: management ldap 2way multi master replication\n"
-	stderr "Usage: ldap_replica [OPTIONS] REPLICA_SERVER\n"
-	stderr "Options:\n"
-	stderr "    -a               add replcation configuration on this server\n"
-	stderr "    -i               Server ID on this server [default: RAMDOM]\n"
-	stderr "    -r               remove replication configuration on this server\n"
-	stderr "    -u USER_RDN      replication user dn\n\n"
-	stderr "Example\n"
-	stderr "    ldap_replica -a -u uid=replica,ou=admin,dc=host,dc=com ldap.target.com\n"
-	stderr "    ldap_replica -r\n\n"
+	stderr $"ldap_replica: management ldap 2way multi master replication\n"
+	stderr $"Usage: ldap_replica [OPTIONS] REPLICA_SERVER\n"
+	stderr $"Options:\n"
+	stderr $"    -a               add replcation configuration on this server\n"
+	stderr $"    -i               Server ID on this server [default: RAMDOM]\n"
+	stderr $"    -r               remove replication configuration on this server\n"
+	stderr $"    -u USER_RDN      replication user dn\n\n"
+	stderr $"Example\n"
+	stderr $"    ldap_replica -a -u uid=replica,ou=admin,dc=host,dc=com ldap.target.com\n"
+	stderr $"    ldap_replica -r\n\n"
 	exit 1
 }
 
@@ -130,7 +130,7 @@ while true
 do
 	case "$1" in
 		-a)
-			[ -n "${OPT_MODE}" ] && stderr "Error: The options -a can not use with -r\n" && exit 1
+			[ -n "${OPT_MODE}" ] && stderr $"Error: The options -a can not use with -r\n" && exit 1
 			OPT_MODE="add"
 			;;
 		-h) help ;;
@@ -138,7 +138,7 @@ do
 			OPT_SRVID="$2"; shift
 			;;
 		-r)
-			[ -n "${OPT_MODE}" ] && stderr "Error: The options -r can not use with -a\n" && exit 1
+			[ -n "${OPT_MODE}" ] && stderr $"Error: The options -r can not use with -a\n" && exit 1
 			OPT_MODE="rem"
 			;;
 		-u)
@@ -161,7 +161,7 @@ OPT_BIND=$(echo ${OPT_USER} | sed 's/\(uid\|ou\)=[^,]*,//g')
 if [ "${OPT_MODE}" = "add" ]; then
 	echo "${OPT_USER}" | ${cmd_grep} "^\(uid\|cn\)=" >& /dev/null
 	[ $? -ne 0 ] && \
-		stderr "\nError: REPLICA user dn format error!\n\n" && help
+		stderr $"\nError: REPLICA user dn format error!\n\n" && help
 
 	u=$(echo ${OPT_USER} | ${cmd_sed} -e 's/,ou=.*//g' -e 's/^uid=//g')
 	passwd_prompt "Input ${u} password"
@@ -176,7 +176,7 @@ if [ "${OPT_MODE}" = "add" ]; then
 		${cmd_ldapsearch} -x -H ldaps://${OPT_TARGET}/ -D "${OPT_USER}" -w "${OPT_PASS}" "(uid=${u})" 2> /dev/null | \
 			${cmd_grep} 'userPassword::' >& /dev/null
 		RET=$?
-		[ $RET -ne 0 ] && OPT_STATUS="$(failure "Invalid access privileges")" || OPT_STATUS="$(success)"
+		[ $RET -ne 0 ] && OPT_STATUS="$(failure $"Invalid access privileges")" || OPT_STATUS="$(success)"
 	fi
 fi
 
@@ -185,27 +185,27 @@ if [ "${OPT_MODE}" = "add" ]; then
 	#
 	# Add mode
 	#
-	echo "You Informations:"
+	echo $"Your Informations:"
 	echo
-	echo "    Replica Account         : ${OPT_USER}"
-	echo "    Replica BIND DN         : ${OPT_BIND}"
-    echo "    Replica Pre Test        : ${OPT_STATUS}"
-	echo "    Replica Server ID       : ${OPT_SRVID}"
-	echo "    Replica Target          : ${OPT_TARGET}"
+	echo $"    Replica Account         : ${OPT_USER}"
+	echo $"    Replica BIND DN         : ${OPT_BIND}"
+    echo $"    Replica Pre Test        : ${OPT_STATUS}"
+	echo $"    Replica Server ID       : ${OPT_SRVID}"
+	echo $"    Replica Target          : ${OPT_TARGET}"
 	echo
 
 	[ ${RET} -ne 0 ] && exit 1
 
 	while true
 	do
-		prompt "Is right your information? [Y/N]"
+		prompt $"Is right your information? [Y/N]"
 		case "${prompt_value^^}" in
 			N) exit ;;
 			Y) echo ""; break ;;
 		esac
 	done
 
-	echo -n " * 1. Regist sync module ... "
+	echo -n $" * 1. Regist sync module ... "
 
 	${cmd_ldapsearch} ${LDAP_PRIV} -b "cn=config" "(cn=module*)" 2> /dev/null | \
 		${cmd_grep} "syncprov.la" >& /dev/null
@@ -229,13 +229,13 @@ olcOverlay: syncprov
 olcSpSessionLog: 100
 EOF
 		RET=$?
-		[ ${RET} -ne 0 ] && failure "regist failed" && echo && exit 1
+		[ ${RET} -ne 0 ] && failure $"regist failed" && echo && exit 1
 	else
 		success
 		echo
 	fi
 
-	echo -n " * 2. Set Server ID ... "
+	echo -n $" * 2. Set Server ID ... "
 
 	SRVID=$(${cmd_ldapsearch} ${LDAP_PRIV} -b "cn=config" "(cn=config)" olcServerID 2> /dev/null | ${cmd_grep} "^olcServerID: [0-9]\+")
 	RET=$?
@@ -244,15 +244,15 @@ EOF
 		SRVID=${SRVID##* }
 
 		if [ ${OPT_SRVID} -ne ${SRVID} ]; then
-			failure "Already set server id to ${SRVID}"
+			failure $"Already set server id to ${SRVID}"
 			echo
 
 			while true
 			do
-				prompt "      Do you want to change server id to ${OPT_SRVID} on this server? [Y/N]"
+				prompt $"      Do you want to change server id to ${OPT_SRVID} on this server? [Y/N]"
 				case "${prompt_value^^}" in
 					Y)
-						echo -n "      => set server id to ${OPT_SRVID} ... "
+						echo -n $"      => set server id to ${OPT_SRVID} ... "
 						change_server_id ${OPT_SRVID}
 						RET=$?
 						if [ ${RET} -eq 0 ]; then
@@ -269,7 +269,7 @@ EOF
 			done
 
 		else
-			success "already set ${SRVID}"
+			success $"already set ${SRVID}"
 			echo
 		fi
 	else
@@ -284,13 +284,13 @@ EOF
 	fi
 
 
-	echo -n " * 3. Set replica server ... "
+	echo -n $" * 3. Set replica server ... "
 
 	REPLICA=$(${cmd_ldapsearch} ${LDAP_PRIV} -o ldif-wrap=no -b "olcDatabase={2}bdb,cn=config" "(olcDatabase={2}bdb)" olcSyncRepl 2> /dev/null | ${cmd_grep} "^olcSyncrepl: ")
 	RET=$?
 
 	if [ ${RET} -eq 0 ]; then
-		failure "Already set replica config!"
+		failure $"Already set replica config!"
 		echo
 
 		REPLICA=$(echo ${REPLICA#*\}} | sed 's/=/_repl_val=/g')
@@ -301,19 +301,19 @@ EOF
 		provider_repl_val=${provider_repl_val//_repl_val}
 
 		echo
-		echo "      ++ Exsited Replica config"
-		echo "         rid        : ${rid_repl_val}"
-		echo "         provider   : ${provider_repl_val}"
-		echo "         binddn     : ${binddn_repl_val}"
-		echo "         searchbase : ${searchbase_repl_val}"
+		echo $"      ++ Exsited Replica config"
+		echo $"         rid        : ${rid_repl_val}"
+		echo $"         provider   : ${provider_repl_val}"
+		echo $"         binddn     : ${binddn_repl_val}"
+		echo $"         searchbase : ${searchbase_repl_val}"
 		echo
 
 		while true
 		do
-			prompt "      Do you want to change replica config on this server? [Y/N]"
+			prompt $"      Do you want to change replica config on this server? [Y/N]"
 			case "${prompt_value^^}" in
 				Y)
-					echo -n "      => modifing replica server config ... "
+					echo -n $"      => modifing replica server config ... "
 					change_replica_config "replace" "${OPT_TARGET}" "${OPT_USER}" "${OPT_PASS}" "${OPT_BIND}"
 					RET=$?
 					if [ ${RET} -eq 0 ]; then
@@ -339,7 +339,7 @@ EOF
 		fi
 	fi
 
-	echo -n " * 4. Set Mirror mode ... "
+	echo -n $" * 4. Set Mirror mode ... "
 
 	MIRROR_MODE=$(${cmd_ldapsearch} ${LDAP_PRIV} -b "olcDatabase={2}bdb,cn=config" "(olcDatabase={2}bdb)" olcMirrorMode 2> /dev/null | ${cmd_grep} "^olcMirrorMode: ")
 	RET=$?
@@ -372,7 +372,7 @@ EOF
 	fi
 
 
-	echo -n " * 5. Set replica overlay ... "
+	echo -n $" * 5. Set replica overlay ... "
 
 	${cmd_ldapsearch} ${LDAP_PRIV} -b "olcOverlay={1}syncprov,olcDatabase={2}bdb,cn=config" >& /dev/null
 	RET=$?
@@ -397,14 +397,14 @@ EOF
 	fi
 
 	echo
-	success "Complete configuration."; echo
+	success $"Complete configuration."; echo
 	echo
 
 elif [ "${OPT_MODE}" = "rem" ]; then
 	#
 	# remove mode
 	#
-	echo -n " * 1. Set Mirror mode ... "
+	echo -n $" * 1. Set Mirror mode ... "
 
 	MIRROR_MODE=$(${cmd_ldapsearch} ${LDAP_PRIV} -b "olcDatabase={2}bdb,cn=config" "(olcDatabase={2}bdb)" olcMirrorMode 2> /dev/null | ${cmd_grep} "^olcMirrorMode: ")
 	RET=$?
@@ -429,7 +429,7 @@ elif [ "${OPT_MODE}" = "rem" ]; then
 		success; echo
 	fi
 
-	echo -n " * 2. Remove replica server ... "
+	echo -n $" * 2. Remove replica server ... "
 
 	REPLICA=$(${cmd_ldapsearch} ${LDAP_PRIV} -o ldif-wrap=no -b "olcDatabase={2}bdb,cn=config" "(olcDatabase={2}bdb)" olcSyncRepl 2> /dev/null | ${cmd_grep} "^olcSyncrepl: ")
 	RET=$?
@@ -455,7 +455,7 @@ else
 	RET=$?
 
 	if [ ${RET} -ne 0 ]; then
-		failure "This server is not set replica configuration!"
+		failure $"This server is not set replica configuration!"
 		echo
 		exit 0
 	fi
@@ -468,7 +468,7 @@ else
 	provider_repl_val=${provider_repl_val//_repl_val}
 
 	echo
-	success "  ++ Current Replica config"
+	success $"  ++ Current Replica config"
 	echo
 	echo "     rid        : ${rid_repl_val}"
 	echo "     provider   : ${provider_repl_val}"

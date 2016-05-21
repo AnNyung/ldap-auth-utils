@@ -15,6 +15,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+prefix=@prefix@
+datarootdir=@datarootdir@
+TEXTDOMAIN=ldap-auth-utils
+TEXTDOMAINDIR=@langdir@
+
 # path of command
 cmd_cp="@CP@"
 cmd_mv="@MV@"
@@ -128,13 +133,13 @@ prompt_must() {
 
 success() {
 	echo -en "${sGREEN}"
-	[ -n "$1" ] && echo -ne "$*" || echo -n "OK"
+	[ -n "$1" ] && echo -ne "$*" || echo -n $"OK"
 	echo -en "${sEND}"
 }
 
 failure() {
 	echo -en "${sRED}"
-	[ -n "$1" ] && echo -ne "$*" || echo -n "Failure"
+	[ -n "$1" ] && echo -ne "$*" || echo -n $"Failure"
 	echo -en "${sEND}"
 }
 
