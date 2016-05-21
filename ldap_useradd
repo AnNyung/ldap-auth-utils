@@ -22,35 +22,35 @@
 source "@datadir@/functions"
 
 help() {
-	stderr "ldap_useradd: Add user to LDAP database\n"
-	stderr "Usage: ldap_useradd [OPTIONS] USERNAME\n"
-	stderr "Options:\n"
-	stderr "    -d HOME_DIR      home directory [Default: /home/ldapusers/USERNAME]\n"
-	stderr "    -e EXPIRE_DATE   expiration date [Default: unlimit(0)]\n"
-	stderr "                     Fromat is \"YYYY-MM-DD HH:mm:SS\" or unix timestamp\n"
-	stderr "    -g GID           ID of the primary group [Default: ldapusers(10000)]\n"
-	stderr "    -G GROUPS        list of supplementary groups\n"
-	stderr "    -h               display this help message and exit\n"
-	stderr "    -H FQDN          host access privileges\n"
-	stderr "    -i               interactive mode. ignore other options\n"
-	stderr "    -n NAME          Real Name\n"
-	stderr "    -l LAST NAME     Last Name\n"
-	stderr "    -p PASSWORD      password. plain string or hashed string(with {CRYPT})\n"
-	stderr "    -s SHELL         login shell [Default: /bin/bash]\n"
-	stderr "    -u UID           user ID [Default: MAXUID + 1]\n"
-	stderr "    -y               None intercative mode\n"
-	stderr "    --gecos          Set GECOS field of passwd entry\n"
-	stderr "\n"
-	stderr "USERNAME format\n"
-	stderr "    FROMAT : ACCOUNT@DOMAIN_NAME\n\n"
-	stderr "    if base dn of LDAP is \"dc=DOMAIN,dc=COM\", domain name is \"DOMAIN.COM\".\n"
-	stderr "\nExamples:\n"
-	stderr "    # add LDAP_USER with BASE DN 'dc=DOMAIN,dc=COM'\n"
-	stderr "    ldap_useradd LDAP_USER@DOMAIN.COM\n\n"
-	stderr "    # add LDAP_USER with option\n"
-	stderr "    ldap_useradd -n \"Michael\" -l \"Jackson\" LDAP_USER@DOMAIN.COM\n"
-	stderr "    # add LDAP_USER with interactive mode\n"
-	stderr "    ldap_useradd -i LDAP_USER@DOMAIN.COM\n"
+	stderr $"ldap_useradd: Add user to LDAP database\n"
+	stderr $"Usage: ldap_useradd [OPTIONS] USERNAME\n"
+	stderr $"Options:\n"
+	stderr $"    -d HOME_DIR      home directory [Default: /home/ldapusers/USERNAME]\n"
+	stderr $"    -e EXPIRE_DATE   expiration date [Default: unlimit(0)]\n"
+	stderr $"                     Fromat is \"YYYY-MM-DD HH:mm:SS\" or unix timestamp\n"
+	stderr $"    -g GID           ID of the primary group [Default: ldapusers(10000)]\n"
+	stderr $"    -G GROUPS        list of supplementary groups\n"
+	stderr $"    -h               display this help message and exit\n"
+	stderr $"    -H FQDN          host access privileges\n"
+	stderr $"    -i               interactive mode. ignore other options\n"
+	stderr $"    -n NAME          Real Name\n"
+	stderr $"    -l LAST NAME     Last Name\n"
+	stderr $"    -p PASSWORD      password. plain string or hashed string(with {CRYPT})\n"
+	stderr $"    -s SHELL         login shell [Default: /bin/bash]\n"
+	stderr $"    -u UID           user ID [Default: MAXUID + 1]\n"
+	stderr $"    -y               None intercative mode\n"
+	stderr $"    --gecos          Set GECOS field of passwd entry\n"
+	stderr $"\n"
+	stderr $"USERNAME format\n"
+	stderr $"    FROMAT : ACCOUNT@DOMAIN_NAME\n\n"
+	stderr $"    if base dn of LDAP is \"dc=DOMAIN,dc=COM\", domain name is \"DOMAIN.COM\".\n"
+	stderr $"\nExamples:\n"
+	stderr $"    # add LDAP_USER with BASE DN 'dc=DOMAIN,dc=COM'\n"
+	stderr $"    ldap_useradd LDAP_USER@DOMAIN.COM\n\n"
+	stderr $"    # add LDAP_USER with option\n"
+	stderr $"    ldap_useradd -n \"Michael\" -l \"Jackson\" LDAP_USER@DOMAIN.COM\n"
+	stderr $"    # add LDAP_USER with interactive mode\n"
+	stderr $"    ldap_useradd -i LDAP_USER@DOMAIN.COM\n"
 	exit 1
 }
 
@@ -107,8 +107,8 @@ do
 		-g)
 			OPT_GID="$2";
 			is_numeric $OPT_GID
-			[ $? -ne 0 ] && stderr "Error: The value of -g option is must numeric\n" && help
-			[ ${OPT_GID} -lt ${MIN_GID} ] && stderr "Error: The value of -g option is bigger than ${MIN_GID}\n" && help
+			[ $? -ne 0 ] && stderr $"Error: The value of -g option is must numeric\n" && help
+			[ ${OPT_GID} -lt ${MIN_GID} ] && stderr $"Error: The value of -g option is bigger than ${MIN_GID}\n" && help
 			shift
 			;;
 		-G) OPT_GROUPS="${OPT_GROUPS} $2"; shift ;;
@@ -122,8 +122,8 @@ do
 		-u)
 			OPT_UID="$2";
 			is_numeric $OPT_GID
-			[ $? -ne 0 ] && stderr "Error: The value of -u option is must numeric\n" && help
-			[ ${OPT_UID} -lt ${MIN_UID} ] && stderr "Error: The value of -u option is bigger than ${MIN_UID}\n" && help
+			[ $? -ne 0 ] && stderr $"Error: The value of -u option is must numeric\n" && help
+			[ ${OPT_UID} -lt ${MIN_UID} ] && stderr $"Error: The value of -u option is bigger than ${MIN_UID}\n" && help
 			shift
 			;;
 		-y) OPT_INT=-1 ;;
@@ -149,7 +149,7 @@ done
 OPT_USERID="$1"
 set_basedn_by_domain "${OPT_USERID}"
 [ $? -ne 0 ] && \
-	stderr "Error: invalide USERNAME '${OPT_USERID}'\n" && help
+	stderr $"Error: invalide USERNAME '${OPT_USERID}'\n" && help
 
 USER_SCHEME="ou=${USER_DN},${BASEDN}"
 GROUP_SCHEME="ou=${GROUP_DN},${BASEDN}"
@@ -161,7 +161,7 @@ fi
 
 check_user_exists ${OPT_USERID}
 if [ $? -eq 0 ]; then
-	stderr "\nError: ${OPT_USERID} is already exists!!!\n\n"
+	stderr $"\nError: ${OPT_USERID} is already exists!!!\n\n"
 	exit 1
 fi
 
@@ -170,20 +170,20 @@ OPT_GROUPS=$(echo ${OPT_GROUPS} | ${cmd_sed} 's/^[ ]\+\|[ ]\+$//g')
 OPT_HOSTS=$(echo ${OPT_HOSTS} | ${cmd_sed} 's/^[ ]\+\|[ ]\+$//g')
 
 if [ $OPT_INT -eq 1 ]; then
-	prompt_must "Your Given Name                         "
+	prompt_must $"Your Given Name                         "
 	OPT_SURNAME="${prompt_value}"
-	prompt_must "Your Surname                            "
+	prompt_must $"Your Surname                            "
 	OPT_NAME="${prompt_value}"
-	prompt_def "$OPT_GECOS" "Password entry GECOS                    "
+	prompt_def "$OPT_GECOS" $"Password entry GECOS                    "
 	OPT_GECOS="${prompt_value}"
 
 	while true
 	do
-		prompt_def 0 "Set UID [Default: ${OPT_UID}]                "
+		prompt_def 0 $"Set UID [Default: ${OPT_UID}]                "
 		is_numeric ${prompt_value}
-		[ $? -ne 0 ] && echo "     .. The values are must numeric!" && continue
+		[ $? -ne 0 ] && echo $"     .. The values are must numeric!" && continue
 		[ ${prompt_value} -lt ${MIN_UID} ] && \
-			stderr "     .. The values are bigger than ${MIN_UID}\n" && continue
+			stderr $"     .. The values are bigger than ${MIN_UID}\n" && continue
 
 		OPT_UID="${prompt_value}"
 		break
@@ -191,26 +191,26 @@ if [ $OPT_INT -eq 1 ]; then
 
 	while true
 	do
-		prompt_def 10000 "Set GID [Default: 10000(ldapusers)]     "
+		prompt_def 10000 $"Set GID [Default: 10000(ldapusers)]     "
 		is_numeric ${prompt_value}
-		[ $? -ne 0 ] && echo "     .. The values are must numeric!" && continue
+		[ $? -ne 0 ] && echo $"     .. The values are must numeric!" && continue
 		[ ${prompt_value} -lt ${MIN_GID} ] && \
-			stderr "     .. The values are bigger than ${MIN_GID}\n" && continue
+			stderr $"     .. The values are bigger than ${MIN_GID}\n" && continue
 
 		OPT_GID="${prompt_value}"
 		break
 	done
 
-	prompt_def "${OPT_HOME}" "Set Home Directory [Default: ${OPT_HOME}] "
+	prompt_def "${OPT_HOME}" $"Set Home Directory [Default: ${OPT_HOME}] "
 	OPT_HOME="${prompt_value}"
-	prompt_def 0 "Set Expire Date [Default: 0(unlimited)] "
+	prompt_def 0 $"Set Expire Date [Default: 0(unlimited)] "
 	OPT_EXPIRE="${prompt_value}"
-	prompt_def "/bin/bash" "Set Shell [Default: /bin/bash]          "
+	prompt_def "/bin/bash" $"Set Shell [Default: /bin/bash]          "
 	OPT_SHELL="${prompt_value}"
 
 	while [ true ]
 	do
-		prompt "Input additional group [Default: none]  "
+		prompt $"Input additional group [Default: none]  "
 		[ -z "${prompt_value}" ] && break;
 
 		OPT_GROUPS="${OPT_GROUPS} ${prompt_value}"
@@ -218,7 +218,7 @@ if [ $OPT_INT -eq 1 ]; then
 
 	while [ true ]
 	do
-		prompt "Input access host [Default: none]       "
+		prompt $"Input access host [Default: none]       "
 		[ -z "${prompt_value}" ] && break;
 
 		OPT_HOSTS="${OPT_HOSTS} ${prompt_value}"
@@ -226,46 +226,46 @@ if [ $OPT_INT -eq 1 ]; then
 
 else
 	if [ ${OPT_INT} -eq -1 ]; then
-		[ -z "${OPT_NAME}" ]    && stderr "Error: -n option doesn't set!\n\n" && exit 1
-		[ -z "${OPT_SURNAME}" ] && stderr "Error: -l option doesn't set!\n\n" && exit 1
+		[ -z "${OPT_NAME}" ]    && stderr $"Error: -n option doesn't set!\n\n" && exit 1
+		[ -z "${OPT_SURNAME}" ] && stderr $"Error: -l option doesn't set!\n\n" && exit 1
 	else
-		[ -z "${OPT_NAME}" ]    && prompt_must "Your Name    " && OPT_NAME="${prompt_value}"
-		[ -z "${OPT_SURNAME}" ] && prompt_must "Your Surname " && OPT_SURNAME="${prompt_value}"
+		[ -z "${OPT_NAME}" ]    && prompt_must $"Your Name    " && OPT_NAME="${prompt_value}"
+		[ -z "${OPT_SURNAME}" ] && prompt_must $"Your Surname " && OPT_SURNAME="${prompt_value}"
 	fi
 fi
 
 if [ -z "${OPT_PASSWD}" ]; then
 
-	[ ${OPT_INT} -eq -1 ] && stderr "Error: -p (password) options doesn't set!\n\n" && exit 1
+	[ ${OPT_INT} -eq -1 ] && stderr $"Error: -p (password) options doesn't set!\n\n" && exit 1
 
 	pass=""
 	while [ -z "${pass}" ]
 	do
-		passwd_prompt "Input password                          "
+		passwd_prompt $"Input password                          "
 		pass=$prompt_value
 
 		password_security "${pass}"
 		RET=$?
 
 		if [ $RET -ne 0 ]; then
-			[ $RET -eq 1 ] && echo "     .. The length of password is requried over ${PASS_MINLEN}"
-			[ $RET -eq 2 ] && echo "     .. password complexity problem" && \
-							  echo "        combined with ${PASS_CLASSES} classes with upper case," && \
-							  echo "        lower case, numeric or special character."
+			[ $RET -eq 1 ] && echo $"     .. The length of password is requried over ${PASS_MINLEN}"
+			[ $RET -eq 2 ] && echo $"     .. password complexity problem" && \
+							  echo $"        combined with ${PASS_CLASSES} classes with upper case," && \
+							  echo $"        lower case, numeric or special character."
 			pass=""
 			continue
 		fi
 
-		passwd_prompt "Re-input password                       "
+		passwd_prompt $"Re-input password                       "
 		pass1=$prompt_value
 
 		if [ -n "${pass}" -a -n "${pass1}" ]; then
 			if [ "${pass}" != "${pass1}" ]; then
-				echo "     .. passwords doesn't match!"
+				echo $"     .. passwords doesn't match!"
 				pass=""
 			fi
 		else
-			echo "     .. passwords doesn't match!"
+			echo $"     .. passwords doesn't match!"
 			pass=""
 		fi
 	done
@@ -278,9 +278,9 @@ else
 		# hashed password
 		echo ${OPT_PWSSWD} | ${cmd_grep} -i "^{CRYPT}.\+$" >& /dev/null
 		if [ $? -ne 0 ]; then
-			stderr "Error: Unsupported password scheme.\n"
-			stderr "       This script supports only {CRYPT}. Use follows:\n"
-			stderr "       slappasswd -h {CRYPT} -c '$1$%.8s' -s \"CLEAR_PASSWORD\"\n\n"
+			stderr $"Error: Unsupported password scheme.\n"
+			stderr $"       This script supports only {CRYPT}. Use follows:\n"
+			stderr $"       slappasswd -h {CRYPT} -c '$1$%.8s' -s \"CLEAR_PASSWORD\"\n\n"
 
 			exit 1
 		fi
@@ -291,11 +291,11 @@ fi
 password_security "${OPT_PASSWD}"
 RET=$?
 
-[ $RET -eq 1 ] && stderr "Error: The length of password is requried over ${PASS_MINLEN}\n" && exit 1
+[ $RET -eq 1 ] && stderr $"Error: The length of password is requried over ${PASS_MINLEN}\n" && exit 1
 if [ $RET -eq 2 ]; then
-	stderr "Error: password complexity problem\n"
-	stderr "       combined with ${PASS_CLASSES} classes with upper case, \n"
-	stderr "       lower case, numeric or special character.\n"
+	stderr $"Error: password complexity problem\n"
+	stderr $"       combined with ${PASS_CLASSES} classes with upper case, \n"
+	stderr $"       lower case, numeric or special character.\n"
 	exit 1
 fi
 
@@ -305,8 +305,8 @@ fi
 if [ -n "${OPT_HOSTS}" ]; then
 	is_object_enable "hostObject"
 	if [ $? -ne 0 ]; then
-		stderr "Warning: This ldap server don't support hostObject objectClass\n"
-		stderr "         Host configuration is ignored\n"
+		stderr $"Warning: This ldap server don't support hostObject objectClass\n"
+		stderr $"         Host configuration is ignored\n"
 		OPT_HOSTS=""
 		HOST_OBJ_CLASS_DESC=""
 	fi
@@ -326,13 +326,13 @@ OPT_EXPIRE_STR="${RET_DATEFORMAT}"
 
 
 if [ "${OPT_UID}" -lt ${MIN_UID} ]; then
-	stderr "\nError: UID is must bigger than ${MIN_UDI}!!\n\n"
+	stderr $"\nError: UID is must bigger than ${MIN_UDI}!!\n\n"
 	exit 1
 fi
 
 check_uniq_uid ${OPT_UID}
 if [ $? -eq 1 ]; then
-	stderr "\nError: ${OPT_UID} is already exists!!!\n\n"
+	stderr $"\nError: ${OPT_UID} is already exists!!!\n\n"
 	exit 1
 fi
 
@@ -362,10 +362,10 @@ EOF
 	OPT_EXPIRE="shadowExpire: ${OPT_EXPIRE}"
 
 if [ ${OPT_INT} -ne -1 ]; then
-	prompt "Is right your informations? [Y/N]"
+	prompt $"Is right your informations? [Y/N]"
 
 	[ "${prompt_value}" != "Y" -a "${prompt_value}" != "y" ] && \
-		stderr "\nYou don't select yes(Y or y). So program is exited!\n" &&
+		stderr $"\nYou don't select yes(Y or y). So program is exited!\n" &&
 		exit 1
 fi
 
@@ -425,16 +425,16 @@ EOF
 
 RET=$?
 
-printf "Regist account %-27s ... " "${OPT_USERID}"
+printf $"Regist account %-27s ... " "${OPT_USERID}"
 [ $RET -eq 0 ] && success || failure
 echo
 
 for grp in ${OPT_GROUPS}
 do
-	printf "Regist member of %-25s ... " "${grp}"
+	printf $"Regist member of %-25s ... " "${grp}"
 
 	check_group_exists ${grp}
-	[ $? -ne 0 ] && failure "not found" && echo && continue
+	[ $? -ne 0 ] && failure $"not found" && echo && continue
 
 	#${cmd_cat} <<EOF
 	${cmd_cat} <<EOF | ${cmd_ldapmodify} ${LDAP_PRIV} >& /dev/null

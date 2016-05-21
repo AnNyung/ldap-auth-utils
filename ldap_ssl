@@ -22,16 +22,16 @@
 source "@datadir@/functions"
 
 help() {
-	stderr "ldap_ssl: management ssl on ldap server\n"
-	stderr "Usage: ldap_ssl [OPTIONS]\n"
-	stderr "Options:\n"
-	stderr "    -C PATH          ca certicate [default: /etc/pki/tls/certs/ca-bundle.crt]\n"
-	stderr "    -a               add ssl configuration on this server\n"
-	stderr "    -c               create private key and self signed server certificate\n"
-	stderr "                     other options are ignored\n"
-	stderr "    -r               remove ssl configuration on this server\n"
-	stderr "    -p PATH          private key\n"
-	stderr "    -s PATH          server certicate\n"
+	stderr $"ldap_ssl: management ssl on ldap server\n"
+	stderr $"Usage: ldap_ssl [OPTIONS]\n"
+	stderr $"Options:\n"
+	stderr $"    -C PATH          ca certicate [default: /etc/pki/tls/certs/ca-bundle.crt]\n"
+	stderr $"    -a               add ssl configuration on this server\n"
+	stderr $"    -c               create private key and self signed server certificate\n"
+	stderr $"                     other options are ignored\n"
+	stderr $"    -r               remove ssl configuration on this server\n"
+	stderr $"    -p PATH          private key\n"
+	stderr $"    -s PATH          server certicate\n"
 	exit 1
 }
 
@@ -54,18 +54,18 @@ do
 	case "$1" in
 		-C) OPT_CKEY=$2; shift ;;
 		-a)
-			[ -n "${OPT_MODE}" ] && stderr "Error: The options -a, -c, -r can't use combination\n" && exit 1
+			[ -n "${OPT_MODE}" ] && stderr $"Error: The options -a, -c, -r can't use combination\n" && exit 1
 			OPT_MODE="add"
 			;;
 		-c)
-			[ -n "${OPT_MODE}" ] && stderr "Error: The options -a, -c, -r can't use combination\n" && exit 1
+			[ -n "${OPT_MODE}" ] && stderr $"Error: The options -a, -c, -r can't use combination\n" && exit 1
 			OPT_MODE="create";
 			;;
 		-h) help ;;
 		-p) OPT_PKEY=$2; shift ;;
 		-s) OPT_SCRT=$2; shift ;;
 		-r)
-			[ -n "${OPT_MODE}" ] && stderr "Error: The options -a, -c, -r can't use combination\n" && exit 1
+			[ -n "${OPT_MODE}" ] && stderr $"Error: The options -a, -c, -r can't use combination\n" && exit 1
 			OPT_MODE="rem"
 			;;
 		--) shift; break;;
@@ -81,7 +81,7 @@ I=1
 if [ "${OPT_MODE}" = "create" ]; then
 
 	printf "* %d. " "${I}"
-	success "Make private key"
+	success $"Make private key"
 	let I++
 
 	if [ ! -f "${OPT_PKEY}" ]; then
@@ -90,24 +90,24 @@ if [ "${OPT_MODE}" = "create" ]; then
 		${cmd_openssl} genrsa -aes128 -passout pass:asdf > ${OPT_PKEY}
 
 		[ $? -ne 0 ] && \
-			echo -n "${OPT_PKEY} create .. " && failure && rm -f ${OPT_PKEY} && echo && exit 1
+			echo -n $"${OPT_PKEY} create .. " && failure && rm -f ${OPT_PKEY} && echo && exit 1
 
 		${cmd_openssl} rsa -in ${OPT_PKEY} -passin pass:asdf -out ${OPT_PKEY}
 
 		[ $? -ne 0 ] &&
-			echo -n "Remove password on ${OPT_PKEY} .. " && failure && rm -f ${OPT_PKEY} && echo && exit 1
+			echo -n $"Remove password on ${OPT_PKEY} .. " && failure && rm -f ${OPT_PKEY} && echo && exit 1
 
-		success "Success" ; echo " create ${OPT_PKEY}"
+		success "Success" ; echo $" create ${OPT_PKEY}"
 		echo
 		echo
 	else
 		echo -n " .. ${OPT_PKEY} "
-		success "already exsist"
+		success $"already exsist"
 		echo;
 	fi
 
 	printf "* %d. " "${I}"
-	success "Make Server key";
+	success $"Make Server key";
 	let I++
 	if [ ! -f "${OPT_SCRT}" ]; then
 		echo; echo
@@ -118,27 +118,27 @@ if [ "${OPT_MODE}" = "create" ]; then
 			[ $? -ne 0 ] && \
 				echo -n "${OPT_PKEY} create .. " && failure && rm -f ${OPT_SCSR} && echo && exit 1
 
-			success "Success" ; echo " create ${OPT_SCSR}"
+			success "Success" ; echo $" create ${OPT_SCSR}"
 			echo
 			echo
 		fi
 
 		printf "* %d. " "${I}"
-		success "Make Self signed certificate";
+		success $"Make Self signed certificate";
 		echo; echo
 		let I++
 
 		${cmd_openssl} x509 -in ${OPT_SCSR} -out ${OPT_SCRT} -req -signkey ${OPT_PKEY} -days 3650
 
 		[ $? -ne 0 ] && \
-			echo -n "${OPT_PKEY} create .. " && failure && echo && exit 1
+			echo -n $"${OPT_PKEY} create .. " && failure && echo && exit 1
 
-		success "Success" ; echo " create ${OPT_SCRT}"
+		success "Success" ; echo $" create ${OPT_SCRT}"
 		rm -f ${OPT_SCSR}
 
 	else
 		echo -n " .. ${OPT_SCRT} "
-		success "already exsist"
+		success $"already exsist"
 		echo;
 	fi
 
@@ -198,8 +198,8 @@ EOF
 		echo "SLAPD_LDAPS=yes" >> /etc/sysconfig/ldap || \
 		${cmd_perl} -pi -e 's/^[\s]*SLAPD_LDAPS=.*/SLAPD_LDAPS=yes/g' /etc/sysconfig/ldap
 
-	success "Regist success"
-	echo " Please restart slapd daemon!"
+	success $"Regist success"
+	echo $" Please restart slapd daemon!"
 
 elif [ "${OPT_MODE}" = "rem" ]; then
 
@@ -215,12 +215,12 @@ replace: olcTLSCertificateKeyFile
 olcTLSCertificateKeyFile: /etc/openldap/certs/password
 EOF
 
-	[ $? -ne 0 ] && stderr "Error: failed remove ssl configurations\n" && exit 1
+	[ $? -ne 0 ] && stderr $"Error: failed remove ssl configurations\n" && exit 1
 
 	${cmd_perl} -pi -e 's/^[\s]*SLAPD_LDAPS=.*/SLAPD_LDAPS=no/g' /etc/sysconfig/ldap
 
-	success "Remove success"
-	echo " Please restart slapd daemon!"
+	success $"Remove success"
+	echo $" Please restart slapd daemon!"
 else
 	help
 fi

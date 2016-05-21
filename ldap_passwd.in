@@ -140,25 +140,25 @@ set_crypt_salt() {
 }
 
 help() {
-	stderr "ldap_passwd: change ldap password\n"
-	stderr "Usage: ldap_passwd [OPTIONS] USERNAME\n"
-	stderr "Options:\n"
-	stderr "    -g Group         Group OU [Default: Group]\n"
-	stderr "    -h               display this help message and exit\n"
-	stderr "    -m HASH_ALGO     md5 or sha512 [default: sha512]\n"
-	stderr "    -u Pepole        Account OU [default: People]\n"
-	stderr "\n"
-	stderr "USERNAME format\n"
-	stderr "    FROMAT : ACCOUNT@DOMAIN_NAME\n\n"
-	stderr "    if base dn of LDAP is \"dc=DOMAIN,dc=COM\", domain name is \"DOMAIN.COM\".\n"
-	stderr "\nExamples:\n"
-	stderr "    # change password of current login user\n"
-	stderr "    ldap_passwd\n\n"
-	stderr "    # change password of current login user with md5 hash algorithm\n"
-	stderr "    ldap_passwd -m md5\n\n"
-	stderr "    # change password of LDAP_USER with BASE DN 'dc=DOMAIN,dc=COM'\n"
-	stderr "    # Only root can change other account!\n"
-	stderr "    ldap_passwd LADP_USER@DOMAIN.com\n\n"
+	stderr $"ldap_passwd: change ldap password\n"
+	stderr $"Usage: ldap_passwd [OPTIONS] USERNAME\n"
+	stderr $"Options:\n"
+	stderr $"    -g Group         Group OU [Default: Group]\n"
+	stderr $"    -h               display this help message and exit\n"
+	stderr $"    -m HASH_ALGO     md5 or sha512 [default: sha512]\n"
+	stderr $"    -u Pepole        Account OU [default: People]\n"
+	stderr $"\n"
+	stderr $"USERNAME format\n"
+	stderr $"    FROMAT : ACCOUNT@DOMAIN_NAME\n\n"
+	stderr $"    if base dn of LDAP is \"dc=DOMAIN,dc=COM\", domain name is \"DOMAIN.COM\".\n"
+	stderr $"\nExamples:\n"
+	stderr $"    # change password of current login user\n"
+	stderr $"    ldap_passwd\n\n"
+	stderr $"    # change password of current login user with md5 hash algorithm\n"
+	stderr $"    ldap_passwd -m md5\n\n"
+	stderr $"    # change password of LDAP_USER with BASE DN 'dc=DOMAIN,dc=COM'\n"
+	stderr $"    # Only root can change other account!\n"
+	stderr $"    ldap_passwd LADP_USER@DOMAIN.com\n\n"
 	exit 1
 }
 
@@ -180,7 +180,7 @@ do
 			shift
 
 			[ "${OPT_HASH}" != "md5" -a "${OPT_HASH}" != "sha512" ] && \
-				stderr "Error: The value of -m option is must md5 or sha512" \
+				stderr $"Error: The value of -m option is must md5 or sha512" \
 				exit 1
 			;;
 		-u) USER_OU="$2"; shift ;;
@@ -195,7 +195,7 @@ else
 	[ $# -ne 1 ] && help
 	set_basedn_by_domain "$1"
 	[ $? -ne 0 ] && \
-		stderr "Error: invalide USERNAME '${OPT_USERID}'\n" && help
+		stderr $"Error: invalide USERNAME '${OPT_USERID}'\n" && help
 fi
 
 USER_OU=${USER_OU:=People}
@@ -223,46 +223,46 @@ ldappass=""
 while [ -z "${pass}" ]
 do
 	if [ ${ROOT_PRIV} -eq 0 -a -z "${ldappass}" ]; then
-		passwd_prompt "Old password    "
+		passwd_prompt $"Old password    "
 		ldappass=$prompt_value
 
 		#echo "${cmd_ldapsearch} -x -H ${HOSTS} -D \"${PRIV}\" -w \"${ldappass}\""
 		${cmd_ldapsearch} -x -H ${HOSTS} -D "${PRIV}" -w "${ldappass}" >& /dev/null
 		RET=$?
 		[ ${RET} -eq 49 ] && \
-			stderr "    .. '${FQDN}' Invalid password\n" && \
-			stderr "       This is caused by wrong password or non ldap account\n" && \
+			stderr $"    .. '${FQDN}' Invalid password\n" && \
+			stderr $"       This is caused by wrong password or non ldap account\n" && \
 			pass="" && ldappass="" && continue
 
-		echo "Credential is OK"
+		echo $"Credential is OK"
 		echo
 	fi
 
-	passwd_prompt "New password    "
+	passwd_prompt $"New password    "
 	pass=$prompt_value
 
 	password_security "${pass}"
 	RET=$?
 
 	if [ $RET -ne 0 ]; then
-		[ $RET -eq 1 ] && echo "     .. The length of password is requried over ${PASS_MINLEN}"
-		[ $RET -eq 2 ] && echo "     .. password complexity problem" && \
-			echo "        combined with ${PASS_CLASSES} classes with upper case," && \
-			echo "        lower case, numeric or special character."
+		[ $RET -eq 1 ] && echo $"     .. The length of password is requried over ${PASS_MINLEN}"
+		[ $RET -eq 2 ] && echo $"     .. password complexity problem" && \
+			echo $"        combined with ${PASS_CLASSES} classes with upper case," && \
+			echo $"        lower case, numeric or special character."
 		pass=""
 		continue
 	fi
 
-	passwd_prompt "Re-New password "
+	passwd_prompt $"Re-New password "
 	pass1=$prompt_value
 
 	if [ -n "${pass}" -a -n "${pass1}" ]; then
 		if [ "${pass}" != "${pass1}" ]; then
-			echo "     .. passwords doesn't match!"
+			echo $"     .. passwords doesn't match!"
 			pass=""
 		fi
 	else
-		echo "     .. passwords doesn't match!"
+		echo $"     .. passwords doesn't match!"
 		pass=""
 	fi
 done

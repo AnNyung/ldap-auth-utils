@@ -22,17 +22,17 @@
 source "@datadir@/functions"
 
 help() {
-	stderr "ldap_userdel: Remove user on LDAP database\n"
-	stderr "Usage: ldap_userdel [OPTIONS] USERNAME ...\n"
-	stderr "Options:\n"
-	stderr "    -y               None intercative mode [default: interactive mode]\n"
-	stderr "\n"
-	stderr "USERNAME format\n"
-	stderr "    FROMAT : ACCOUNT@DOMAIN_NAME\n\n"
-	stderr "    if base dn of LDAP is \"dc=DOMAIN,dc=COM\", domain name is \"DOMAIN.COM\".\n"
-	stderr "\nExamples:\n"
-	stderr "    # remove LDAP_USER with BASE DN 'dc=DOMAIN,dc=COM'\n"
-	stderr "    ldap_userdel LDAP_USER@DOMAIN.COM\n\n"
+	stderr $"ldap_userdel: Remove user on LDAP database\n"
+	stderr $"Usage: ldap_userdel [OPTIONS] USERNAME ...\n"
+	stderr $"Options:\n"
+	stderr $"    -y               None intercative mode [default: interactive mode]\n"
+	stderr $"\n"
+	stderr $"USERNAME format\n"
+	stderr $"    FROMAT : ACCOUNT@DOMAIN_NAME\n\n"
+	stderr $"    if base dn of LDAP is \"dc=DOMAIN,dc=COM\", domain name is \"DOMAIN.COM\".\n"
+	stderr $"\nExamples:\n"
+	stderr $"    # remove LDAP_USER with BASE DN 'dc=DOMAIN,dc=COM'\n"
+	stderr $"    ldap_userdel LDAP_USER@DOMAIN.COM\n\n"
 	exit 1
 }
 
@@ -65,7 +65,7 @@ OPT_RM_USERS="$*"
 for userid in $OPT_RM_USERS
 do
 	if [ ${OPT_INT} -eq 0 ]; then
-		prompt_def N "  * Do you want to remove '${userid}' account ? [yes/${srYELLOW}no${sEND}] "
+		prompt_def N $"  * Do you want to remove '${userid}' account ? [yes/${srYELLOW}no${sEND}] "
 		prompt_value="${prompt_value^^}"
 	else
 		prompt_value="YES"
@@ -73,11 +73,11 @@ do
 
 	[ "${prompt_value}" != "YES" ] && continue;
 
-	printf "    * Remove account %-30s ... " "${userid}"
+	printf $"    * Remove account %-30s ... " "${userid}"
 
 	set_basedn_by_domain "${userid}"
 	[ $? -ne 0 ] && failure && echo && \
-		stderr "      Error: invalide USERNAME '${userid}'\n" && \
+		stderr $"      Error: invalide USERNAME '${userid}'\n" && \
 		continue
 
 	USER_SCHEME="ou=${USER_DN},${BASEDN}"
@@ -85,15 +85,15 @@ do
 
 	check_user_exists ${userid}
 	[ $? -eq 1 ] && failure && echo && \
-		stderr "      Error: '${userid}' account is not found!!!\n\n" && \
+		stderr $"      Error: '${userid}' account is not found!!!\n\n" && \
 		continue
 
 	get_uid ${userid}
 	uid=${RETVAL}
 
 	[ ${uid} -lt ${MIN_UID} ] && failure && echo && \
-		stderr "      Error: The uid of '${userid}' account is ${uid}\n" && \
-		stderr "             This program can not control that is smaller than ${MIN_UID}\n\n" && \
+		stderr $"      Error: The uid of '${userid}' account is ${uid}\n" && \
+		stderr $"             This program can not control that is smaller than ${MIN_UID}\n\n" && \
 		continue
 
 	# first, remove memberUid of group
@@ -109,9 +109,9 @@ memberUid: ${userid}
 EOF
 
 		[ $? -ne  0 ] && failure && echo && \
-			stderr "      Error: failed remove additional group\n" && \
-			stderr "             confirm memberUid of ${rdn}\n" && \
-			stderr "             skip remove ${userid} account\n\n" && \
+			stderr $"      Error: failed remove additional group\n" && \
+			stderr $"             confirm memberUid of ${rdn}\n" && \
+			stderr $"             skip remove ${userid} account\n\n" && \
 			continue 2
 	done
 	

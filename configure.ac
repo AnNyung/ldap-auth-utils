@@ -94,6 +94,25 @@ else
 	fi
 fi
 
+AC_PATH_PROG(MSGFMT, msgfmt)
+AC_ARG_WITH(msgfmt,
+			[  --with-msgfmt=PATH      path of msgfmt program])
+if test "x$with_msgfmt" != "x"; then
+	if test -f $with_msgfmt; then
+		ac_cv_path_MSGFMT=$with_msgfmt
+	fi
+else
+	if test "x$ac_cv_path_MSGFMT" != "x"; then
+		if test -f $ac_cv_path_MSGFMT ; then
+			ac_cv_path_MSGFMT=$with_msgfmt
+		else
+			AC_MSG_ERROR([Can not found msgfmt])
+		fi
+	else
+		AC_MSG_ERROR([Can not found msgfmt])
+	fi
+fi
+
 ldappath=""
 if test "x$with_ldap_bindir" != "x"; then
 	if test -d $with_ldap_bindir; then
@@ -145,5 +164,8 @@ if test ! -f "$ac_cv_path_OPENSSL"; then
 	AC_MSG_ERROR(Can not found openssl)
 fi
 
-AC_CONFIG_FILES([Makefile functions ldap_passwd man/Makefile])
+AC_SUBST(langdir)
+langdir="${datadir}/locale"
+
+AC_CONFIG_FILES([Makefile functions ldap_passwd man/Makefile po/Makefile])
 AC_OUTPUT
