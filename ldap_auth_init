@@ -69,7 +69,7 @@ EOF
 	if [ ! -f "/etc/openldap/schema/sudo.schema" ]; then
 		schema=$(/bin/rpm -ql sudo 2>/dev/null | ${cmd_grep} -i openldap)
 		[ $? -eq 0 ] &&
-			${cmd_cp} -af ${chema} /etc/openldap/schema/sudo.schema
+			${cmd_cp} -af ${schema} /etc/openldap/schema/sudo.schema
 	fi
 
 	[ -f "/etc/openldap/schema/sudo.schema" ] &&
