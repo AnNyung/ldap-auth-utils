@@ -167,14 +167,14 @@ do
 	read opt
 
 	if [ -n "${opt}" ]; then
-		echo "${opt}" | ${cmd_grep} "dc=" >& /dev/null
+		echo "${opt}" | ${cmd_grep} -i "dc=" >& /dev/null
 		[ $? -ne 0 ] && opt=
 	fi
 done
 
 BASEDN="${opt}"
 BASEDN=$(echo ${BASEDN} | ${cmd_sed} 's/ //g')
-BASE=$(echo "$BASEDN" | ${cmd_perl} -pe 's/,\s*dc=.*//g' | ${cmd_perl} -pe 's/dc=/BASE=/g')
+BASE=$(echo "$BASEDN" | ${cmd_perl} -pe 's/,\s*dc=.*//ig' | ${cmd_perl} -pe 's/dc=/BASE=/ig')
 eval "${BASE}"
 BASEUP="${BASE^^}"
 
@@ -217,7 +217,7 @@ echo $"5. Settings BASE DN"
 for file in /etc/openldap/slapd.d/cn\=config/olcDatabase*
 do
 	printf "   . %-60s ... " "${file}"
-	${cmd_perl} -pi -e "s/dc=my-domain,dc=com/${BASEDN}/g" "$file"
+	${cmd_perl} -pi -e "s/dc=my-domain,dc=com/${BASEDN}/ig" "$file"
 	[ $? -eq 0 ] && success "Done" || failure
 	echo
 done
