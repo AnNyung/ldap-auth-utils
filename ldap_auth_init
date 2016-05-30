@@ -96,7 +96,11 @@ echo
 echo
 echo $"2. syslog configuration"
 
-FNAME="/etc/rsyslog.d/slapd.conf"
+ps auxw | ${cmd_grep} -v grep | ${cmd_grep} rsyslogd >& /dev/null
+[ $? -eq 0 ] && sysdaemon="rsyslog" || sysdaemon="syslog"
+
+
+FNAME="/etc/${sysdaemon}.d/slapd.conf"
 printf "   . %-60s ... " "${FNAME}"
 
 ${cmd_mkdir_p} /var/log/slapd >& /dev/null
@@ -109,7 +113,7 @@ EOF
 	if [ $? -eq 0 ]; then
 		success "Done"
 		echo
-		/sbin/service rsyslog restart | ${cmd_sed} 's/^/     /g'
+		/sbin/service ${sysdaemon} restart | ${cmd_sed} 's/^/     /g'
 	fi
 else
 	success "Pass"
