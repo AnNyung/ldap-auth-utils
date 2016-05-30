@@ -54,7 +54,7 @@ all:
 install: install-man install-po
 	$(MKDIR) $(DESTDIR)$(sbindir)
 	$(MKDIR) $(DESTDIR)$(sysconfdir)
-	$(MKDIR) $(DESTDIR)$(datadir)/ldap-auth-utils
+	$(MKDIR) $(DESTDIR)$(datadir)/ldap-auth-utils/schema
 
 	for i in $(sbinlist) ; do \
 		$(INSTALL) -m 755 $(WORKDIR)/$$i $(DESTDIR)$(sbindir) ; \
@@ -63,6 +63,9 @@ install: install-man install-po
 	$(INSTALL) -m 600 ldap-auth-utils.conf $(DESTDIR)$(sysconfdir)/ldap-auth-utils.conf;
 	$(INSTALL) -m 644 functions $(DESTDIR)$(datadir)/ldap-auth-utils/functions;
 	$(INSTALL) -m 644 config.sed $(DESTDIR)$(datadir)/ldap-auth-utils/config.sed;
+	for i in `ls schema/` ; do \
+		$(INSTALL) -m 644 schema/$$i $(DESTDIR)$(datadir)/ldap-auth-utils/schema/$$i ; \
+	done
 
 install-po:
 	$(MAKE) -C po DESTDIR=$(DESTDIR) install

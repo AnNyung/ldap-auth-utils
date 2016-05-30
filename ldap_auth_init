@@ -21,6 +21,8 @@
 
 source "@datadir@/functions"
 
+OSVER=$(${cmd_cat} /etc/rpm/macros.dist | ${cmd_grep} "%rhel[[:space:]]\+[[:digit:]]\+" | ${cmd_awk} '{print $2}')
+
 LDAP_PRIV="-Y EXTERNAL -H ldapi:///"
 
 echo $"1. Installation ldap packages"
@@ -31,55 +33,41 @@ echo
 /usr/bin/yum install openldap-servers openldap-clients
 
 ${cmd_rm} -rf /etc/openldap/slapd.d/
-if [ ! -d /etc/openldap/slapd.d -a ! -f /etc/openldap/slapd.conf ]; then
+if [ ! -f /etc/openldap/slapd.d/cn=config.ldif -a ! -f /etc/openldap/slapd.conf ]; then
 	# convert from old style config slapd.conf
 
-	${cmd_cp} -af /usr/share/openldap-servers/slapd.conf.obsolete /etc/openldap/slapd.conf
-	${cmd_chown} root:root /etc/openldap/slapd.conf
+	if [ ${OSVER} -lt 7 ]; then
+		${cmd_cp} -af /usr/share/openldap-servers/slapd.conf.obsolete /etc/openldap/slapd.conf
+		${cmd_chown} root:root /etc/openldap/slapd.conf
+
+		if [ ! -f "/etc/openldap/schema/ldapns.schema" ]; then
+			${cmd_cp} -af @datadir@/schema/ldapns.schema \
+				/etc/openldap/schema/
+		fi
+
+		[ -f "/etc/openldap/schema/ldapns.schema" ] &&
+		${cmd_perl} -pi -e \
+			's!(include[\t].+collective.schema)!\1\ninclude\t\t/etc/openldap/schema/ldapns.schema!g' \
+			/etc/openldap/slapd.conf
+
+		if [ ! -f "/etc/openldap/schema/sudo.schema" ]; then
+			schema=$(/bin/rpm -ql sudo 2>/dev/null | ${cmd_grep} -i openldap)
+			[ $? -eq 0 ] &&
+				${cmd_cp} -af ${schema} /etc/openldap/schema/sudo.schema
+		fi
+
+		[ -f "/etc/openldap/schema/sudo.schema" ] &&
+			${cmd_perl} -pi -e \
+				's!(include[\t].+collective.schema)!\1\ninclude\t\t/etc/openldap/schema/sudo.schema!g' \
+				/etc/openldap/slapd.conf
+	fi
 	
-	if [ ! -f "/etc/openldap/schema/ldapns.schema" ]; then
-		cat <<EOF > /etc/openldap/schema/ldapns.schema
-# \$Id: ldapns.schema,v 1.3 2003/05/29 12:57:29 lukeh Exp $
-# LDAP Name Service Additional Schema
-# http://www.iana.org/assignments/gssapi-service-names
-
-attributetype ( 1.3.6.1.4.1.5322.17.2.1 NAME 'authorizedService'
-	DESC 'IANA GSS-API authorized service name'
-	EQUALITY caseIgnoreMatch
-	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{256} )
-
-objectclass ( 1.3.6.1.4.1.5322.17.1.1 NAME 'authorizedServiceObject'
-	DESC 'Auxiliary object class for adding authorizedService attribute'
-	SUP top
-	AUXILIARY
-	MAY authorizedService )
-
-objectclass ( 1.3.6.1.4.1.5322.17.1.2 NAME 'hostObject'
-	DESC 'Auxiliary object class for adding host attribute'
-	SUP top
-	AUXILIARY
-	MAY host )
-EOF
-	fi
-
-	[ -f "/etc/openldap/schema/ldapns.schema" ] &&
-	${cmd_perl} -pi -e \
-		's!(include[\t].+collective.schema)!\1\ninclude\t\t/etc/openldap/schema/ldapns.schema!g' \
-		/etc/openldap/slapd.conf
-
-	if [ ! -f "/etc/openldap/schema/sudo.schema" ]; then
-		schema=$(/bin/rpm -ql sudo 2>/dev/null | ${cmd_grep} -i openldap)
-		[ $? -eq 0 ] &&
-			${cmd_cp} -af ${schema} /etc/openldap/schema/sudo.schema
-	fi
-
-	[ -f "/etc/openldap/schema/sudo.schema" ] &&
-	${cmd_perl} -pi -e \
-		's!(include[\t].+collective.schema)!\1\ninclude\t\t/etc/openldap/schema/sudo.schema!g' \
-		/etc/openldap/slapd.conf
-
 	${cmd_mkdir_p} /etc/openldap/slapd.d/
-	${cmd_slaptest} -f /etc/openldap/slapd.conf -F /etc/openldap/slapd.d &>/dev/null
+	if [ ${OSVER} -lt 7 ]; then
+		${cmd_slaptest} -f /etc/openldap/slapd.conf -F /etc/openldap/slapd.d &>/dev/null
+	else
+		/usr/libexec/openldap/convert-config.sh -f @datadir@/schema/init.ldif >& /dev/null
+	fi
 	${cmd_chown} -R ldap:ldap /etc/openldap/slapd.d
 	${cmd_chmod} -R 000 /etc/openldap/slapd.d
 	${cmd_chmod} -R u+rwX /etc/openldap/slapd.d
@@ -87,7 +75,8 @@ EOF
 
 	${cmd_cp} -af /usr/share/openldap-servers/DB_CONFIG.example /var/lib/ldap/DB_CONFIG
 	${cmd_chown} ldap:ldap /var/lib/ldap/DB_CONFIG
-	${cmd_mv} -f /etc/openldap/slapd.conf /etc/openldap/slapd-current.conf
+	[ ${OSVER} -lt 7 ] && \
+		${cmd_mv} -f /etc/openldap/slapd.conf /etc/openldap/slapd-current.conf
 fi
 echo
 echo
@@ -113,7 +102,7 @@ EOF
 	if [ $? -eq 0 ]; then
 		success "Done"
 		echo
-		/sbin/service ${sysdaemon} restart | ${cmd_sed} 's/^/     /g'
+		/sbin/service ${sysdaemon} restart >& /dev/stdout | ${cmd_sed} 's/^/     /g'
 	fi
 else
 	success "Pass"
@@ -146,16 +135,21 @@ echo
 echo
 echo $"3. SLAPD configuration and start"
 
-FNAME="/etc/sysconfig/ldap"
 printf "   . %-60s ... " "${FNAME}"
-${cmd_perl} -pi -e 's/#SLAPD_/SLAPD_/g' ${FNAME}
+if [ ${OSVER} -lt 7 ]; then
+	FNAME="/etc/sysconfig/ldap"
+	${cmd_perl} -pi -e 's/#SLAPD_/SLAPD_/g' ${FNAME}
+else
+	FNAME="/etc/sysconfig/slapd"
+	${cmd_perl} -pi -e 's!^SLAPD_URLS="[^"]+"!SLAPD_URLS="ldapi:/// ldap:/// ldaps:///"!g' ${FNAME}
+fi
 
 if [ $? -eq 0 ]; then
 	success "Done"
 	echo
-	/sbin/service slapd restart | ${cmd_sed} 's/^/     /g'
+	/sbin/service slapd restart >& /dev/stdout | ${cmd_sed} 's/^/     /g'
 	[ -f /usr/bin/systemctl ] && \
-		/usr/bin/systemctl enable slapd || /sbin/chkconfig slapd on
+		/usr/bin/systemctl enable slapd >& /dev/null || /sbin/chkconfig slapd on
 else
 	failure
 	echo
@@ -268,7 +262,7 @@ add: olcRootPW
 olcRootPW: ${ROOTPW}
 EOF
 
-/sbin/service slapd restart | ${cmd_sed} 's/^/     /g'
+/sbin/service slapd restart >& /dev/stdout | ${cmd_sed} 's/^/     /g'
 echo
 
 ${cmd_perl} -pi -e 's/\@LDAPPW\@/${ROOTPPW}/g' ${confdir}/ldap-auth-utils.conf >& /dev/null
