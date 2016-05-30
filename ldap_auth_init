@@ -155,7 +155,7 @@ if [ $? -eq 0 ]; then
 	echo
 	/sbin/service slapd restart | ${cmd_sed} 's/^/     /g'
 	[ -f /usr/bin/systemctl ] && \
-		/usr/sbin/systemctl enable slapd || /sbin/chkconfig slapd on
+		/usr/bin/systemctl enable slapd || /sbin/chkconfig slapd on
 else
 	failure
 	echo
