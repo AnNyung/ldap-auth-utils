@@ -59,7 +59,6 @@ objectclass ( 1.3.6.1.4.1.5322.17.1.2 NAME 'hostObject'
 	SUP top
 	AUXILIARY
 	MAY host )
-mv
 EOF
 	fi
 
@@ -88,7 +87,7 @@ EOF
 
 	${cmd_cp} -af /usr/share/openldap-servers/DB_CONFIG.example /var/lib/ldap/DB_CONFIG
 	${cmd_chown} ldap:ldap /var/lib/ldap/DB_CONFIG
-	${cmd_mv} -af /etc/openldap/slapd.conf /etc/openldap/slapd-current.conf
+	${cmd_mv} -f /etc/openldap/slapd.conf /etc/openldap/slapd-current.conf
 fi
 echo
 echo
@@ -253,7 +252,7 @@ echo
 echo
 echo $"6. Settings Admin password"
 
-${cmd_cat} <<EOF | ${cmd_ldapmodify} ${LADP_PRIV} >& /dev/stdout | ${cmd_sed} 's/^/   /g' | ${cmd_grep} -v "^[ ]*$"
+${cmd_cat} <<EOF | ${cmd_ldapmodify} ${LDAP_PRIV} >& /dev/stdout | ${cmd_sed} 's/^/   /g' | ${cmd_grep} -v "^[ ]*$"
 dn: olcDatabase={0}config,cn=config
 changetype: modify
 add: olcRootPW
@@ -278,7 +277,8 @@ echo $"7. Initial Directory Information Tree"
 #
 # use CN=manager privileges for confirm Manager privileges
 #
-${cmd_cat} <<EOF | ${cmd_ldapadd} -a -c -H ldapi:/// -D "cn=Manager,${BASEDN}" -w ${ROOTPPW} | ${cmd_sed} 's/^/   /g' | ${cmd_grep} -v "^[ ]*$"
+LDAP_PPRIV="-H ldapi:/// -D cn=Manager,${BASEDN} -w ${ROOTPPW}"
+${cmd_cat} <<EOF | ${cmd_ldapadd} -a -c ${LDAP_PPRIV} | ${cmd_sed} 's/^/   /g' | ${cmd_grep} -v "^[ ]*$"
 dn: ${BASEDN}
 dc: ${BASE}
 o: ${BASEUP} LDAP
@@ -308,7 +308,7 @@ echo
 echo
 echo $"8. Create default groups"
 
-${cmd_cat} <<EOF | ${cmd_ldapadd} -a -c ${LDAP_PRIV} | ${cmd_sed} 's/^/   /g' | ${cmd_grep} -v "^[ ]*$"
+${cmd_cat} <<EOF | ${cmd_ldapadd} -a -c ${LDAP_PPRIV} | ${cmd_sed} 's/^/   /g' | ${cmd_grep} -v "^[ ]*$"
 # extended LDIF
 #
 # LDAPv3
