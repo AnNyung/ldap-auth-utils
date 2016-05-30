@@ -21,6 +21,8 @@
 
 source "@datadir@/functions"
 
+LDAP_PRIV="-Y EXTERNAL -H ldapi:///"
+
 echo $"1. Installation ldap packages"
 echo
 echo
