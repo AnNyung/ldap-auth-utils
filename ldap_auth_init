@@ -267,8 +267,9 @@ EOF
 /sbin/service slapd restart | ${cmd_sed} 's/^/     /g'
 echo
 
-${cmd_perl} -pi -e 's/\@LDAPPW\@//g' ${confdir}/ldap-auth-utils.conf >& /dev/null
+${cmd_perl} -pi -e 's/\@LDAPPW\@/${ROOTPPW}/g' ${confdir}/ldap-auth-utils.conf >& /dev/null
 ${cmd_perl} -pi -e 's/\@RDN\@/cn=Manager,${BASEDN}/g' ${confdir}/ldap-auth-utils.conf >& /dev/null
+${cmd_chmod} 600 ${confdir}/ldap-auth-utils.conf >& /dev/null
 
 
 echo
