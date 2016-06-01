@@ -279,7 +279,7 @@ msgstr "    -r               호스트 제거\\n"
 
 #: ../ldap_replica:30
 msgid "    -r               remove replication configuration on this server\\n"
-msgstr "    -r               이 서버의 리플리케이션 설정 제거"
+msgstr "    -r               이 서버의 리플리케이션 설정 제거\\n"
 
 #: ../ldap_ssl:32
 msgid "    -r               remove ssl configuration on this server\\n"
