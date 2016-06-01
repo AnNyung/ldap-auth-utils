@@ -82,6 +82,7 @@ do
 
 	USER_SCHEME="ou=${USER_DN},${BASEDN}"
 	GROUP_SCHEME="ou=${GROUP_DN},${BASEDN}"
+	userid=${OPT_USERID}
 
 	check_user_exists ${userid}
 	[ $? -eq 1 ] && failure && echo && \
