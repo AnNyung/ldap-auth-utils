@@ -22,7 +22,6 @@
 source "@datadir@/functions"
 
 OSVER=$(${cmd_cat} /etc/rpm/macros.dist | ${cmd_grep} "%rhel[[:space:]]\+[[:digit:]]\+" | ${cmd_awk} '{print $2}')
-[ ${OSVER} -lt 7 ] && sysconf="ldap" || sysconf="slapd"
 
 help() {
 	stderr $"ldap_ssl: management ssl on ldap server\n"
