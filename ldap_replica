@@ -167,16 +167,16 @@ if [ "${OPT_MODE}" = "add" ]; then
 	passwd_prompt "Input ${u} password"
 	OPT_PASS=$prompt_value
 
-	${cmd_ldapsearch} -x -H ldaps://${OPT_TARGET}/ -D "${OPT_USER}" -w "${OPT_PASS}" "(uid=${u})" >& /dev/null
+	${cmd_ldapsearch} -o nettimeout=3 -x -H ldaps://${OPT_TARGET}/ -D "${OPT_USER}" -w "${OPT_PASS}" "(uid=${u})" >& /dev/null
 	RET=$?
 
 	if [ ${RET} -eq 49 ]; then
 		OPT_STATUS="$(failure "${u} login failed")"
 	else
-		${cmd_ldapsearch} -x -H ldaps://${OPT_TARGET}/ -D "${OPT_USER}" -w "${OPT_PASS}" "(uid=${u})" 2> /dev/null | \
+		${cmd_ldapsearch} -o nettimeout=3 -x -H ldaps://${OPT_TARGET}/ -D "${OPT_USER}" -w "${OPT_PASS}" "(uid=${u})" 2> /dev/null | \
 			${cmd_grep} 'userPassword::' >& /dev/null
 		RET=$?
-		[ $RET -ne 0 ] && OPT_STATUS="$(failure $"Invalid access privileges")" || OPT_STATUS="$(success)"
+		[ $RET -ne 0 ] && OPT_STATUS="$(failure $"Invalid access privileges or connect failed")" || OPT_STATUS="$(success)"
 	fi
 fi
 
