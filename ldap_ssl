@@ -205,6 +205,12 @@ EOF
 			/etc/sysconfig/slapd
 	fi
 
+	# ldap.conf configuraiton
+	${cmd_cat} /etc/openldap/ldap.conf | ${cmd_grep} "^[[:space:]]*TLS_REQCERT[[:space:]]\+" >& /dev/null
+	[ $? -ne 0 ] && \
+		echo -e "TLS_REQCERT\tallow" >> /etc/openldap/ldap.conf || \
+		${cmd_perl} -pi -e 's!(^[\s]*TLS_REQCERT[\s]+).*!$1allow!g' /etc/openldap/ldap.conf
+
 	success $"Regist success"
 	echo $" Please restart slapd daemon!"
 
