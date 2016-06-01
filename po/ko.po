@@ -502,7 +502,7 @@ msgstr " * 추가 멤버 '${member}' 확인 .. "
 
 #: ../ldap_ssl:202 ../ldap_ssl:223
 msgid " Please restart slapd daemon!"
-msgstr "slapd 데몬을 재시작 하십시오!"
+msgstr " slapd 데몬을 재시작 하십시오!"
 
 #: ../ldap_ssl:100
 #, sh-format
