@@ -21,6 +21,9 @@
 
 source "@datadir@/functions"
 
+OSVER=$(${cmd_cat} /etc/rpm/macros.dist | ${cmd_grep} "%rhel[[:space:]]\+[[:digit:]]\+" | ${cmd_awk} '{print $2}')
+[ ${OSVER} -lt 7 ] && sysconf="ldap" || sysconf="slapd"
+
 help() {
 	stderr $"ldap_ssl: management ssl on ldap server\n"
 	stderr $"Usage: ldap_ssl [OPTIONS]\n"
@@ -189,14 +192,19 @@ EOF
 
 	[ $? -ne 0 ] && stderr "Error: failed add ssl configurations\n" && exit 1
 
-	${cmd_cat} /etc/sysconfig/ldap | ${cmd_grep} "^[ \t]*SLAPD_LDAPS=" >& /dev/null
-	[ $? -ne 0 ] && \
-		${cmd_perl} -pi -e 's/^[\s]*#[\s]*SLAPD_LDAPS=/SLAPD_LDAPS=/g' /etc/sysconfig/ldap
+	if [ ${OSVER} -lt 7 ]; then
+		#${cmd_cat} /etc/sysconfig/ldap | ${cmd_grep} "^[ \t]*SLAPD_LDAPS=" >& /dev/null
+		#[ $? -ne 0 ] && \
+		#	${cmd_perl} -pi -e 's/^[\s]*#[\s]*SLAPD_LDAPS=/SLAPD_LDAPS=/g' /etc/sysconfig/ldap
 
-	${cmd_cat} /etc/sysconfig/ldap | ${cmd_grep} "^[ \t]*SLAPD_LDAPS=" >& /dev/null
-	[ $? -ne 0 ] && \
-		echo "SLAPD_LDAPS=yes" >> /etc/sysconfig/ldap || \
-		${cmd_perl} -pi -e 's/^[\s]*SLAPD_LDAPS=.*/SLAPD_LDAPS=yes/g' /etc/sysconfig/ldap
+		${cmd_cat} /etc/sysconfig/ldap | ${cmd_grep} "^[ \t]*SLAPD_LDAPS=" >& /dev/null
+		[ $? -ne 0 ] && \
+			echo "SLAPD_LDAPS=yes" >> /etc/sysconfig/ldap || \
+			${cmd_perl} -pi -e 's/^[\s]*SLAPD_LDAPS=.*/SLAPD_LDAPS=yes/g' /etc/sysconfig/ldap
+	else
+		${cmd_perl} -pi -e 's!^[\s]*SLAPD_URLS="[^"]+"!SLAPD_URLS="ldapi:/// ldap:/// ldaps:///"!g' \
+			/etc/sysconfig/slapd
+	fi
 
 	success $"Regist success"
 	echo $" Please restart slapd daemon!"
@@ -217,7 +225,12 @@ EOF
 
 	[ $? -ne 0 ] && stderr $"Error: failed remove ssl configurations\n" && exit 1
 
-	${cmd_perl} -pi -e 's/^[\s]*SLAPD_LDAPS=.*/SLAPD_LDAPS=no/g' /etc/sysconfig/ldap
+	if [ ${OSVER} -lt 7 ]; then
+		${cmd_perl} -pi -e 's/^[\s]*SLAPD_LDAPS=.*/SLAPD_LDAPS=no/g' /etc/sysconfig/ldap
+	else
+		${cmd_perl} -pi -e 's!^[\s]*SLAPD_URLS="[^"]+"!SLAPD_URLS="ldapi:/// ldap:///"!g' \
+			/etc/sysconfig/slapd
+	fi
 
 	success $"Remove success"
 	echo $" Please restart slapd daemon!"
