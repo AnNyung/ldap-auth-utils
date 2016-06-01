@@ -35,7 +35,8 @@ prog_init() {
 	URI[0]=$(${cmd_cat} /etc/openldap/ldap.conf 2> /dev/null | ${cmd_awk} '/URI[ ]+/ {print $2}')
 	URI[1]=$(${cmd_cat} /etc/openldap/ldap.conf 2> /dev/null | ${cmd_awk} '/URI[ ]+/ {print $3}')
 	URI[2]=$(${cmd_cat} /etc/openldap/ldap.conf 2> /dev/null | ${cmd_awk} '/URI[ ]+/ {print $4}')
-	BASEDN=$(${cmd_cat} /etc/openldap/ldap.conf 2> /dev/null | ${cmd_awk} '/BASE[ ]+/ {print $2}')
+	BASEDN=$(${cmd_cat} /etc/openldap/ldap.conf 2> /dev/null | ${cmd_awk} '/BASE[ ]+/ {print substr($0, index($0,$2))}')
+	BASEDN=$(echo ${BASEDN} | ${cmd_sed} 's/[[:space:]]\+//g')
 
 	OPT_HASH="sha512"
 	PASS_MINLEN=9
@@ -191,8 +192,18 @@ done
 
 if [ ${ROOT_PRIV} -eq 0 ]; then
 	[ $# -gt 0 ] && help
+
+	if [ -z "${BASEDN}" ]; then
+		stderr $"Error: BASEDN has not been set. Please set BASE option to the /etc/openldap/ldap.conf"
+		stderr "\n\n"
+		exit 1
+	fi
 else
-	[ $# -ne 1 ] && help
+	if [ $# -ne 1 ]; then
+		stderr $"Error: Root must execute with USER account!\n"
+		stderr $"       For example, run as '$0 ACCOUNT@DOMIAN'\n\n"
+		help
+	fi
 	set_basedn_by_domain "$1"
 	[ $? -ne 0 ] && \
 		stderr $"Error: invalide USERNAME '${OPT_USERID}'\n" && help
@@ -204,17 +215,19 @@ GROUP_OU=${GROUP_OU:=Group}
 USER_SCHEME="ou=${USER_OU},${BASEDN}"
 GROUP_SCHEME="ou=${GROUP_OU},${BASEDN}"
 
+HOSTS=${URI[*]}
+
 if [ ${ROOT_PRIV} -eq 0 ]; then
 	RDN="uid=${USER},${USER_SCHEME}"
-	PRIV=$RDN
+	PRIV="-x -D $RDN"
 	FQDN=$(echo ${BASEDN} | sed -e 's/^dc=//ig' -e 's/,dc=/./ig')
 	FQDN="${USER}@${FQDN}"
 else
 	RDN="uid=${OPT_USERID},${USER_SCHEME}"
-	PRIV="cn=Manager,${BASEDN}"
+	#PRIV="cn=Manager,${BASEDN}"
+	PRIV="-Y EXTERNAL"
+	HOSTS="ldapi:///"
 fi
-
-HOSTS=${URI[*]}
 
 set_crypt_salt $OPT_HASH
 
@@ -226,13 +239,18 @@ do
 		passwd_prompt $"Old password    "
 		ldappass=$prompt_value
 
-		#echo "${cmd_ldapsearch} -x -H ${HOSTS} -D \"${PRIV}\" -w \"${ldappass}\""
-		${cmd_ldapsearch} -x -H ${HOSTS} -D "${PRIV}" -w "${ldappass}" >& /dev/null
+		#echo "${cmd_ldapsearch} -H ${HOSTS} ${PRIV} -w \"${ldappass}\""
+		${cmd_ldapsearch} -H ${HOSTS} ${PRIV} -w "${ldappass}" >& /dev/null
 		RET=$?
 		[ ${RET} -eq 49 ] && \
 			stderr $"    .. '${FQDN}' Invalid password\n" && \
 			stderr $"       This is caused by wrong password or non ldap account\n" && \
 			pass="" && ldappass="" && continue
+		[ ${RET} -ne 0 ] && \
+			stderr $"    .. connect error to ldap server.\n" && \
+			stderr $"       Please contact the administrator.\n" && \
+			exit 1
+
 
 		echo $"Credential is OK"
 		echo
@@ -281,6 +299,16 @@ RET_TIMESTAMP=$(${cmd_date} +"%s")
 RET_DATEFORMAT=$(${cmd_date} -d "@${RET_TIMESTAMP}" +"%Y-%m-%d %H:%M:%S" 2> /dev/null)
 RET_TIMESTAMP=$(( ${RET_TIMESTAMP} / 86400 ))
 
+if [ $ROOT_PRIV -eq 1 ]; then
+	passopt=""
+else
+	if [ -n "${ldappass}" ]; then
+		passopt="-w ${ldappass}"
+	else
+		passopt="-W"
+	fi
+fi
+
 # for debugging
 cat <<EOF
 
@@ -290,20 +318,14 @@ Your Informations:
     * RDN : ${RDN}
     * Host: ${HOSTS}
     * Privilieges: ${PRIV}
-    * Commnad: ${cmd_ldapmodify} -x -H "${HOSTS}" -D "${PRIV}" -W
+    * Commnad: ${cmd_ldapmodify} -H "${HOSTS}" ${PRIV} ${passopt}
     * Hash: ${OPT_PASSWD}
 
 EOF
 
 OPT_PASSWD=$(echo -n "$OPT_PASSWD" | base64 -w 0)
 
-if [ $ROOT_PRIV -eq 0 -a -n "${ldappass}" ]; then
-	passopt="-w ${ldappass}"
-else
-	passopt="-W"
-fi
-
-${cmd_cat} <<EOF | ${cmd_ldapmodify} -x -H "${HOSTS}" -D "${PRIV}" ${passopt}
+${cmd_cat} <<EOF | ${cmd_ldapmodify} -H "${HOSTS}" ${PRIV} ${passopt}
 dn: ${RDN}
 changetype: modify
 replace: userPassword
