@@ -93,6 +93,8 @@ OPT_HOSTS=""
 OPT_GECOS=${OPT_GECOS:="LDAP Users"}
 OPT_HOME_PREFIX=${OPT_HOME_PREFIX:=/home/ldapusers}
 
+hashed_pass=0
+
 HOST_OBJ_CLASS_DESC="objectClass: hostObject"
 
 opts=$(${cmd_getopt} -u -n "$(${cmd_basename} "$0")" -o d:,e:,g:,G:,h,H:,i,l:,n:,p:,s:,u:,y -l gecos: -- "$@")
@@ -284,6 +286,7 @@ else
 
 			exit 1
 		fi
+		hashed_pass=1
 	fi
 fi
 
@@ -314,7 +317,8 @@ fi
 
 
 # crypt {md5,sha256,sha512}
-OPT_PASSWD=$(${cmd_slappasswd} -s "${OPT_PASSWD}" -h {crypt} -c "${OPT_CRYPT_SALT}")
+[ ${hashed_pass} -eq 0 ] &&
+	OPT_PASSWD=$(${cmd_slappasswd} -s "${OPT_PASSWD}" -h {crypt} -c "${OPT_CRYPT_SALT}")
 
 ldap_timestamp
 OPT_LASTCHANGE=${RET_TIMESTAMP}

@@ -321,6 +321,10 @@ password_security() {
 	local pass="$*"
 	local class=0
 
+	# skip check when string is hashed
+	echo ${pass} | ${cmd_grep} -i "^{\(CRYPT\|SSHA\)}.\+$" >& /dev/null
+	[ $? -eq 0 ] && return 0
+
 	if [ ${PASS_MINLEN} -gt 0 ]; then
 		length=${#pass}
 		[ $length -lt ${PASS_MINLEN} ] && return 1
