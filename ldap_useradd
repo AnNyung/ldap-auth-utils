@@ -396,6 +396,10 @@ fi
 
 OPT_PASSWD=$(echo ${OPT_PASSWD} | base64 -w 0)
 
+[ "${FULL_NAME_ORDER}" = "GS" ] && \
+	CN_VALUE="${OPT_NAME} ${OPT_SURNAME}" || \
+	CN_VALUE="${OPT_SURNAME} ${OPT_NAME}"
+
 ${cmd_cat} <<EOF | ${cmd_grep} -v '^$' | ${cmd_ldapadd} -a -c ${LDAP_PRIV} >& /dev/null
 # create ${OPT_USERID}
 dn: uid=${OPT_USERID},${USER_SCHEME}
@@ -407,7 +411,7 @@ objectClass: shadowAccount
 ${HOST_OBJ_CLASS_DESC}
 
 uid: ${OPT_USERID}
-cn: ${OPT_USERID}
+cn: ${CN_VALUE}
 gecos: ${OPT_GECOS}
 givenName: ${OPT_NAME}
 sn: ${OPT_SURNAME}
