@@ -33,6 +33,7 @@ cmd_ldapsearch="@LDAPSEARCH@"
 
 prefix=@prefix@
 confdir="@sysconfdir@"
+datadir="@datarootdir@/ldap-auth-utils"
 
 if [ -f "${confdir}/ldap-auth-utils.conf" ]; then
 	conf_context=$(LANG="C" ${cmd_sed} -n -f ${datadir}/config.sed ${confdir}/ldap-auth-utils.conf)
