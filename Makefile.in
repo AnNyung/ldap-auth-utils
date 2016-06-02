@@ -79,4 +79,24 @@ clean:
 
 distclean: clean
 	$(RM) -rf Makefile config.h ldap_passwd functions *~ autom4te.cache
-	$(RM) -rf */Makefile
+	$(RM) -rf */Makefile *.bz2 *.zip *.gz
+
+dist: dist-bz2
+
+dist-bz2:
+	$(MKDIR) dist/$(PROG)-$(VERSION)
+	rsync -av --exclude="dist" --exclude=".git" * dist/$(PROG)-$(VERSION)/
+	cd dist; tar cvfpj $(PROG)-$(VERSION).tar.bz2 $(PROG)-$(VERSION); \
+		mv $(PROG)-$(VERSION).tar.bz2 ../; cd -; rm -rf dist
+
+dist-gz:
+	$(MKDIR) dist/$(PROG)-$(VERSION)
+	rsync -av --exclude="dist" --exclude=".git" * dist/$(PROG)-$(VERSION)/
+	cd dist; tar cvfpz $(PROG)-$(VERSION).tar.gz $(PROG)-$(VERSION); \
+		mv $(PROG)-$(VERSION).tar.gz ../; cd -; rm -rf dist
+
+dist-zip:
+	$(MKDIR) dist/$(PROG)-$(VERSION)
+	rsync -av --exclude="dist" --exclude=".git" * dist/$(PROG)-$(VERSION)/
+	cd dist; zip -r $(PROG)-$(VERSION).zip $(PROG)-$(VERSION); \
+		mv $(PROG)-$(VERSION).zip ../; cd -; rm -rf dist
