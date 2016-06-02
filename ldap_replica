@@ -23,7 +23,7 @@ source "@datadir@/functions"
 
 help() {
 	stderr $"ldap_replica: management ldap 2way multi master replication\n"
-	stderr $"Usage: ldap_replica [OPTIONS] REPLICA_SERVER\n"
+	stderr $"Usage: ldap_replica [OPTIONS] REPLICA_PROVIEDER_SERVER\n"
 	stderr $"Options:\n"
 	stderr $"    -a               add replcation configuration on this server\n"
 	stderr $"    -i               Server ID on this server [default: RAMDOM]\n"
@@ -155,7 +155,7 @@ else
 	[ $# -ne 1 ] && help
 fi
 
-OPT_TARGET="$1"
+OPT_PROVIDER="$1"
 OPT_BIND=$(echo ${OPT_USER} | sed 's/\(uid\|ou\)=[^,]*,//g')
 
 if [ "${OPT_MODE}" = "add" ]; then
@@ -167,13 +167,13 @@ if [ "${OPT_MODE}" = "add" ]; then
 	passwd_prompt "Input ${u} password"
 	OPT_PASS=$prompt_value
 
-	${cmd_ldapsearch} -o nettimeout=3 -x -H ldaps://${OPT_TARGET}/ -D "${OPT_USER}" -w "${OPT_PASS}" "(uid=${u})" >& /dev/null
+	${cmd_ldapsearch} -o nettimeout=3 -x -H ldaps://${OPT_PROVIDER}/ -D "${OPT_USER}" -w "${OPT_PASS}" "(uid=${u})" >& /dev/null
 	RET=$?
 
 	if [ ${RET} -eq 49 ]; then
 		OPT_STATUS="$(failure "${u} login failed")"
 	else
-		${cmd_ldapsearch} -o nettimeout=3 -x -H ldaps://${OPT_TARGET}/ -D "${OPT_USER}" -w "${OPT_PASS}" "(uid=${u})" 2> /dev/null | \
+		${cmd_ldapsearch} -o nettimeout=3 -x -H ldaps://${OPT_PROVIDER}/ -D "${OPT_USER}" -w "${OPT_PASS}" "(uid=${u})" 2> /dev/null | \
 			${cmd_grep} 'userPassword::' >& /dev/null
 		RET=$?
 		[ $RET -ne 0 ] && OPT_STATUS="$(failure $"Invalid access privileges or connect failed")" || OPT_STATUS="$(success)"
@@ -191,7 +191,7 @@ if [ "${OPT_MODE}" = "add" ]; then
 	echo $"    Replica BIND DN         : ${OPT_BIND}"
     echo $"    Replica Pre Test        : ${OPT_STATUS}"
 	echo $"    Replica Server ID       : ${OPT_SRVID}"
-	echo $"    Replica Target          : ${OPT_TARGET}"
+	echo $"    Replica Provider        : ${OPT_PROVIDER}"
 	echo
 
 	[ ${RET} -ne 0 ] && exit 1
@@ -230,10 +230,10 @@ olcSpSessionLog: 100
 EOF
 		RET=$?
 		[ ${RET} -ne 0 ] && failure $"regist failed" && echo && exit 1
-	else
-		success
-		echo
 	fi
+
+	success
+	echo
 
 	echo -n $" * 2. Set Server ID ... "
 
@@ -314,7 +314,7 @@ EOF
 			case "${prompt_value^^}" in
 				Y)
 					echo -n $"      => modifing replica server config ... "
-					change_replica_config "replace" "${OPT_TARGET}" "${OPT_USER}" "${OPT_PASS}" "${OPT_BIND}"
+					change_replica_config "replace" "${OPT_PROVIDER}" "${OPT_USER}" "${OPT_PASS}" "${OPT_BIND}"
 					RET=$?
 					if [ ${RET} -eq 0 ]; then
 						success; echo
@@ -329,7 +329,7 @@ EOF
 			break;
 		done
 	else
-		change_replica_config "add" "${OPT_TARGET}" "${OPT_USER}" "${OPT_PASS}" "${OPT_BIND}"
+		change_replica_config "add" "${OPT_PROVIDER}" "${OPT_USER}" "${OPT_PASS}" "${OPT_BIND}"
 		RET=$?
 		if [ ${RET} -eq 0 ]; then
 			success; echo
@@ -380,7 +380,7 @@ EOF
 	if [ ${RET} -eq 0 ]; then
 		success; echo
 	else
-		${cmd_cat} <<EOF | ${cmd_ldaymodify} ${LDAP_PRIV} >& /dev/null
+		${cmd_cat} <<EOF | ${cmd_ldapmodify} ${LDAP_PRIV} >& /dev/null
 dn: olcOverlay=syncprov,olcDatabase={2}bdb,cn=config
 changetype: add
 objectClass: olcOverlayConfig

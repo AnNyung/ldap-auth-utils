@@ -326,7 +326,7 @@ msgstr ""
 
 #: ../ldap_replica:194
 #, sh-format
-msgid "    Replica Target          : ${OPT_TARGET}"
+msgid "    Replica Provider        : ${OPT_TARGET}"
 msgstr ""
 
 #: ../ldap_grpadd:35 ../ldap_grpdel:33 ../ldap_host_manage:33
@@ -834,7 +834,7 @@ msgid "Usage: ldap_host_manage [OPTIONS] USERNAME HOST1\\n"
 msgstr ""
 
 #: ../ldap_replica:26
-msgid "Usage: ldap_replica [OPTIONS] REPLICA_SERVER\\n"
+msgid "Usage: ldap_replica [OPTIONS] REPLICA_PROVIDER_SERVER\\n"
 msgstr ""
 
 #: ../ldap_ssl:26
