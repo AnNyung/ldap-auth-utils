@@ -99,7 +99,7 @@ fi
 #
 # user/group check
 #
-BUF="$(${cmd_ldapsearch} ${LDAB_PRIV} -b "${SEARCH_DN}"  "${FILTERS}" 2> /dev/null)"
+BUF="$(${cmd_ldapsearch} ${LDAB_PRIV} -o ldif-wrap=no -b "${SEARCH_DN}"  "${FILTERS}" 2> /dev/null)"
 echo "${BUF}" | ${cmd_grep} "# numEntries: " >& /dev/null
 
 if [ $? -ne 0 ]; then
