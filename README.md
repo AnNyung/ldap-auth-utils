@@ -230,7 +230,7 @@ USERNAME format
 [root@an3 ~]$
 [root@an3 ~]$ # change password of LDAP_USER with BASE DN 'dc=DOMAIN,dc=COM'
 [root@an3 ~]$ # Only root can change other account!
-[root@an3 ~]$ ldap_passwd LADP_USER@DOMAIN.com
+[root@an3 ~]$ ldap_passwd LDAP_USER@DOMAIN.com
 ```
   * ldap_replica
 ```bash

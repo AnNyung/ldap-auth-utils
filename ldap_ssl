@@ -176,7 +176,7 @@ EOF
 		${cmd_grep} "olcTLSCertificateKeyFile:" >& /dev/null
 	[ $? -eq 0 ] && keymod="replace" || keymod="add"
 
-	${cmd_cat} <<EOF | ${cmd_ldapmodify} ${LADP_PRIV} >& /dev/null
+	${cmd_cat} <<EOF | ${cmd_ldapmodify} ${LDAP_PRIV} >& /dev/null
 dn: cn=config
 changetype: modify
 ${camod}: olcTLSCACertificateFile
@@ -216,7 +216,7 @@ EOF
 
 elif [ "${OPT_MODE}" = "rem" ]; then
 
-	${cmd_cat} <<EOF | ${cmd_ldapmodify} ${LADP_PRIV} >& /dev/null
+	${cmd_cat} <<EOF | ${cmd_ldapmodify} ${LDAP_PRIV} >& /dev/null
 dn: cn=config
 changetype: modify
 delete: olcTLSCACertificateFile

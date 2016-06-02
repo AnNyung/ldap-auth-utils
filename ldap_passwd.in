@@ -168,7 +168,7 @@ help() {
 	stderr $"    ldap_passwd -m md5\n\n"
 	stderr $"    # change password of LDAP_USER with BASE DN 'dc=DOMAIN,dc=COM'\n"
 	stderr $"    # Only root can change other account!\n"
-	stderr $"    ldap_passwd LADP_USER@DOMAIN.com\n\n"
+	stderr $"    ldap_passwd LDAP_USER@DOMAIN.com\n\n"
 	exit 1
 }
 
