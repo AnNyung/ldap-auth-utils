@@ -31,6 +31,14 @@ cmd_slappasswd="@SLAPPASSWD@"
 cmd_ldapmodify="@LDAPMODIFY@"
 cmd_ldapsearch="@LDAPSEARCH@"
 
+prefix=@prefix@
+datarootdir=@datarootdir@
+datadir="@datarootdir@/ldap-auth-utils"
+
+if [ -f "${datadir}/functions" ]; then
+	source "${datadir}/functions"
+fi
+
 prog_init() {
 	URI[0]=$(${cmd_cat} /etc/openldap/ldap.conf 2> /dev/null | ${cmd_awk} '/URI[ ]+/ {print $2}')
 	URI[1]=$(${cmd_cat} /etc/openldap/ldap.conf 2> /dev/null | ${cmd_awk} '/URI[ ]+/ {print $3}')
@@ -38,9 +46,9 @@ prog_init() {
 	BASEDN=$(${cmd_cat} /etc/openldap/ldap.conf 2> /dev/null | ${cmd_awk} '/BASE[ ]+/ {print substr($0, index($0,$2))}')
 	BASEDN=$(echo ${BASEDN} | ${cmd_sed} 's/[[:space:]]\+//g')
 
-	OPT_HASH="sha512"
-	PASS_MINLEN=9
-	PASS_CLASSES=3
+	OPT_HASH=${PASSWD_MECH:=sha512}
+	PASS_MINLEN=${PASS_MINLEN:=9}
+	PASS_CLASSES=${PASS_CLASSES:=3}
 }
 
 stderr() {
