@@ -411,7 +411,7 @@ objectClass: shadowAccount
 ${HOST_OBJ_CLASS_DESC}
 
 uid: ${OPT_USERID}
-cn: ${OPT_FULL_NAME}
+cn: ${OPT_USERID}
 gecos: ${OPT_GECOS}
 givenName: ${OPT_NAME}
 displayName: ${OPT_FULL_NAME}
