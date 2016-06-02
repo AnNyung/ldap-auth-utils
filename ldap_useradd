@@ -394,7 +394,7 @@ fi
 # 필드 8 : 계정 만료 기간
 # 필드 9 : 예약 필드
 
-OPT_PASSWD=$(echo ${OPT_PASSWD} | base64)
+OPT_PASSWD=$(echo ${OPT_PASSWD} | base64 -w 0)
 
 ${cmd_cat} <<EOF | ${cmd_grep} -v '^$' | ${cmd_ldapadd} -a -c ${LDAP_PRIV} >& /dev/null
 # create ${OPT_USERID}
