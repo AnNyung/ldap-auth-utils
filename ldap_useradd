@@ -274,11 +274,11 @@ if [ -z "${OPT_PASSWD}" ]; then
 
 	OPT_PASSWD=${pass}
 else
-	echo ${OPT_PWSSWD} | ${cmd_grep} -i "^{[a-z]\+\}.\+$" >& /dev/null
+	echo ${OPT_PASSWD} | ${cmd_grep} -i "^{[a-z]\+}.\+$" >& /dev/null
 
 	if [ $? -eq 0 ]; then
 		# hashed password
-		echo ${OPT_PWSSWD} | ${cmd_grep} -i "^{CRYPT}.\+$" >& /dev/null
+		echo ${OPT_PASSWD} | ${cmd_grep} -i "^{CRYPT}.\+$" >& /dev/null
 		if [ $? -ne 0 ]; then
 			stderr $"Error: Unsupported password scheme.\n"
 			stderr $"       This script supports only {CRYPT}. Use follows:\n"
