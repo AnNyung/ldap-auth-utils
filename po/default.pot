@@ -4,8 +4,8 @@
 # JoungKyun.Kim <http://oops.org/>, 2016.
 #
 # made by
-#    xgettext -d default --from-code=euc-kr -L Shell -s \
-#       configure src/include/*.h src/sbin/oops-firewall contrib/oops-firewall.init*
+#    xgettext -d default --from-code=utf-8 -L Shell -s ../ldap_*
+#
 # if you merge new version, msgmerge -U old.po new.po
 # xgettext 0.13 support shell script
 #
@@ -13,8 +13,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: ldap-auth-utils 1.0.0\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-05-21 18:24+0900\n"
+"Report-Msgid-Bugs-To: https://https://github.com/Joungkyun/ldap-auth-utils/issues\n"
+"POT-Creation-Date: 2016-06-03 03:14+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -27,23 +27,27 @@ msgstr ""
 msgid "                     Fromat is \"YYYY-MM-DD HH:mm:SS\" or unix timestamp\\n"
 msgstr ""
 
-#: ../ldap_ssl:31
+#: ../ldap_auth:32
+msgid "                     or Group with -g option\\n"
+msgstr ""
+
+#: ../ldap_ssl:33
 msgid "                     other options are ignored\\n"
 msgstr ""
 
-#: ../ldap_userdel:96
+#: ../ldap_userdel:97
 #, sh-format
 msgid ""
 "             This program can not control that is smaller than ${MIN_UID}\\n"
 "\\n"
 msgstr ""
 
-#: ../ldap_userdel:113
+#: ../ldap_userdel:114
 #, sh-format
 msgid "             confirm memberUid of ${rdn}\\n"
 msgstr ""
 
-#: ../ldap_userdel:114
+#: ../ldap_userdel:115
 #, sh-format
 msgid "             skip remove ${userid} account\\n\\n"
 msgstr ""
@@ -68,29 +72,29 @@ msgstr ""
 msgid "         searchbase : ${searchbase_repl_val}"
 msgstr ""
 
-#: ../ldap_auth:140
+#: ../ldap_auth:144
 #, sh-format
 msgid "        ${errmsg}\\n"
 msgstr ""
 
-#: ../ldap_useradd:253
+#: ../ldap_useradd:255
 #, sh-format
 msgid "        combined with ${PASS_CLASSES} classes with upper case,"
 msgstr ""
 
-#: ../ldap_useradd:254
+#: ../ldap_useradd:256
 msgid "        lower case, numeric or special character."
 msgstr ""
 
-#: ../ldap_auth:188
+#: ../ldap_auth:192
 msgid "       If you want to this value, use -d option\\n"
 msgstr ""
 
-#: ../ldap_useradd:282
+#: ../ldap_useradd:284
 msgid "       This script supports only {CRYPT}. Use follows:\\n"
 msgstr ""
 
-#: ../ldap_useradd:283
+#: ../ldap_useradd:285
 msgid "       slappasswd -h {CRYPT} -c '$1$%.8s' -s \\"
 msgstr ""
 
@@ -117,17 +121,17 @@ msgid ""
 "      Do you want to change server id to ${OPT_SRVID} on this server? [Y/N]"
 msgstr ""
 
-#: ../ldap_userdel:88
+#: ../ldap_userdel:89
 #, sh-format
 msgid "      Error: '${userid}' account is not found!!!\\n\\n"
 msgstr ""
 
-#: ../ldap_userdel:95
+#: ../ldap_userdel:96
 #, sh-format
 msgid "      Error: The uid of '${userid}' account is ${uid}\\n"
 msgstr ""
 
-#: ../ldap_userdel:112
+#: ../ldap_userdel:113
 msgid "      Error: failed remove additional group\\n"
 msgstr ""
 
@@ -136,39 +140,39 @@ msgstr ""
 msgid "      Error: invalide USERNAME '${userid}'\\n"
 msgstr ""
 
-#: ../ldap_useradd:251
+#: ../ldap_useradd:253
 #, sh-format
 msgid "     .. The length of password is requried over ${PASS_MINLEN}"
 msgstr ""
 
-#: ../ldap_useradd:198
+#: ../ldap_useradd:200
 #, sh-format
 msgid "     .. The values are bigger than ${MIN_GID}\\n"
 msgstr ""
 
-#: ../ldap_useradd:186
+#: ../ldap_useradd:188
 #, sh-format
 msgid "     .. The values are bigger than ${MIN_UID}\\n"
 msgstr ""
 
-#: ../ldap_useradd:184 ../ldap_useradd:196
+#: ../ldap_useradd:186 ../ldap_useradd:198
 msgid "     .. The values are must numeric!"
 msgstr ""
 
-#: ../ldap_useradd:252
+#: ../ldap_useradd:254
 msgid "     .. password complexity problem"
 msgstr ""
 
-#: ../ldap_auth_init:191 ../ldap_auth_init:195
-#: ../ldap_useradd:264 ../ldap_useradd:268
+#: ../ldap_auth_init:190 ../ldap_auth_init:194 ../ldap_useradd:266
+#: ../ldap_useradd:270
 msgid "     .. passwords doesn't match!"
 msgstr ""
 
-#: ../ldap_auth:36
+#: ../ldap_auth:38
 msgid "    # View information LDAP_GROUP with BASE DN 'dc=DOMAIN,dc=COM\\n"
 msgstr ""
 
-#: ../ldap_auth:34
+#: ../ldap_auth:36
 msgid "    # View information LDAP_USER with BASE DN 'dc=DOMAIN,dc=COM'\\n"
 msgstr ""
 
@@ -188,7 +192,7 @@ msgstr ""
 msgid "    # remove HOST to LDAP_USER BASE DN 'dc=DOMAIN,dc=COM'\\n"
 msgstr ""
 
-#: ../ldap_auth:40
+#: ../ldap_auth:42
 msgid "    # remove attribute on LDAP_USER with BASE DN 'dc=DOMAIN,dc=COM'\\n"
 msgstr ""
 
@@ -196,7 +200,7 @@ msgstr ""
 msgid "    # remove member of LDAP_GROUP@DOMAIN.COM\\n"
 msgstr ""
 
-#: ../ldap_auth:38
+#: ../ldap_auth:40
 msgid ""
 "    # set or modify attribute on LDAP_USER with BASE DN 'dc=DOMAIN,dc=COM'\\n"
 msgstr ""
@@ -205,7 +209,7 @@ msgstr ""
 msgid "    * Remove account %-30s ... "
 msgstr ""
 
-#: ../ldap_ssl:28
+#: ../ldap_ssl:30
 msgid ""
 "    -C PATH          ca certicate [default: /etc/pki/tls/certs/ca-bundle."
 "crt]\\n"
@@ -215,11 +219,11 @@ msgstr ""
 msgid "    -a               add replcation configuration on this server\\n"
 msgstr ""
 
-#: ../ldap_ssl:29
+#: ../ldap_ssl:31
 msgid "    -a               add ssl configuration on this server\\n"
 msgstr ""
 
-#: ../ldap_ssl:30
+#: ../ldap_ssl:32
 msgid ""
 "    -c               create private key and self signed server certificate\\n"
 msgstr ""
@@ -262,7 +266,11 @@ msgstr ""
 msgid "    -m MERBER_NAME   group member. enable multiple\\n"
 msgstr ""
 
-#: ../ldap_ssl:33
+#: ../ldap_auth:31
+msgid "    -o               change OU. defalut value is People with -u option"
+msgstr ""
+
+#: ../ldap_ssl:35
 msgid "    -p PATH          private key\\n"
 msgstr ""
 
@@ -274,15 +282,15 @@ msgstr ""
 msgid "    -r               remove replication configuration on this server\\n"
 msgstr ""
 
-#: ../ldap_ssl:32
+#: ../ldap_ssl:34
 msgid "    -r               remove ssl configuration on this server\\n"
 msgstr ""
 
-#: ../ldap_ssl:34
+#: ../ldap_ssl:36
 msgid "    -s PATH          server certicate\\n"
 msgstr ""
 
-#: ../ldap_auth:31
+#: ../ldap_auth:33
 msgid "    -u               searching account [default option]\\n"
 msgstr ""
 
@@ -295,7 +303,7 @@ msgid ""
 "    -y               None intercative mode [default: interactive mode]\\n"
 msgstr ""
 
-#: ../ldap_auth:32
+#: ../ldap_auth:34
 msgid "    -y               None intercative mode\\n\\n"
 msgstr ""
 
@@ -319,14 +327,14 @@ msgstr ""
 msgid "    Replica Pre Test        : ${OPT_STATUS}"
 msgstr ""
 
+#: ../ldap_replica:194
+#, sh-format
+msgid "    Replica Provider        : ${OPT_PROVIDER}"
+msgstr ""
+
 #: ../ldap_replica:193
 #, sh-format
 msgid "    Replica Server ID       : ${OPT_SRVID}"
-msgstr ""
-
-#: ../ldap_replica:194
-#, sh-format
-msgid "    Replica Provider        : ${OPT_TARGET}"
 msgstr ""
 
 #: ../ldap_grpadd:35 ../ldap_grpdel:33 ../ldap_host_manage:33
@@ -334,19 +342,19 @@ msgstr ""
 msgid "    if base dn of LDAP is \"dc=DOMAIN,dc=COM\", domain name is \"DOMAIN.COM\".\\n"
 msgstr ""
 
-#: ../ldap_auth:37
+#: ../ldap_auth:39
 msgid "    ldap_auth -g LDAP_GROUP@DOMAIN.COM\\n\\n"
 msgstr ""
 
-#: ../ldap_auth:39
+#: ../ldap_auth:41
 msgid "    ldap_auth -u LDAP_USER@DOMAIN.COM shadowMax 99999\\n\\n"
 msgstr ""
 
-#: ../ldap_auth:41
+#: ../ldap_auth:43
 msgid "    ldap_auth -u LDAP_USER@DOMAIN.COM shadowMax\\n"
 msgstr ""
 
-#: ../ldap_auth:35
+#: ../ldap_auth:37
 msgid "    ldap_auth -u LDAP_USER@DOMAIN.COM\\n\\n"
 msgstr ""
 
@@ -403,19 +411,19 @@ msgstr ""
 msgid "    ldap_userdel LDAP_USER@DOMAIN.COM\\n\\n"
 msgstr ""
 
-#: ../ldap_auth_init:166
+#: ../ldap_auth_init:165
 msgid "   Input your BASE DN : "
 msgstr ""
 
-#: ../ldap_auth_init:184
+#: ../ldap_auth_init:183
 msgid "   Input your ldap administrator password   "
 msgstr ""
 
-#: ../ldap_auth_init:186
+#: ../ldap_auth_init:185
 msgid "   Re-input your ldap administrator password"
 msgstr ""
 
-#: ../ldap_auth_init:205
+#: ../ldap_auth_init:204
 msgid "   Reault:"
 msgstr ""
 
@@ -491,51 +499,51 @@ msgstr ""
 msgid " * check additional member '${member}' .. "
 msgstr ""
 
-#: ../ldap_ssl:202 ../ldap_ssl:223
+#: ../ldap_ssl:215 ../ldap_ssl:241
 msgid " Please restart slapd daemon!"
 msgstr ""
 
-#: ../ldap_ssl:100
+#: ../ldap_ssl:102
 #, sh-format
 msgid " create ${OPT_PKEY}"
 msgstr ""
 
-#: ../ldap_ssl:136
+#: ../ldap_ssl:138
 #, sh-format
 msgid " create ${OPT_SCRT}"
 msgstr ""
 
-#: ../ldap_ssl:121
+#: ../ldap_ssl:123
 #, sh-format
 msgid " create ${OPT_SCSR}"
 msgstr ""
 
-#: ../ldap_ssl:93 ../ldap_ssl:134
+#: ../ldap_ssl:95 ../ldap_ssl:136
 #, sh-format
 msgid "${OPT_PKEY} create .. "
 msgstr ""
 
-#: ../ldap_auth_init:24
+#: ../ldap_auth_init:28
 msgid "1. Installation ldap packages"
 msgstr ""
 
-#: ../ldap_auth_init:96
+#: ../ldap_auth_init:86
 msgid "2. syslog configuration"
 msgstr ""
 
-#: ../ldap_auth_init:142
+#: ../ldap_auth_init:136
 msgid "3. SLAPD configuration and start"
 msgstr ""
 
-#: ../ldap_auth_init:162
+#: ../ldap_auth_init:161
 msgid "4. Order your BASE Information"
 msgstr ""
 
-#: ../ldap_auth_init:215
+#: ../ldap_auth_init:214
 msgid "5. Settings BASE DN"
 msgstr ""
 
-#: ../ldap_auth_init:252
+#: ../ldap_auth_init:251
 msgid "6. Settings Admin password"
 msgstr ""
 
@@ -543,11 +551,11 @@ msgstr ""
 msgid "7. Initial Directory Information Tree"
 msgstr ""
 
-#: ../ldap_auth_init:307
+#: ../ldap_auth_init:308
 msgid "8. Create default groups"
 msgstr ""
 
-#: ../ldap_auth_init:431
+#: ../ldap_auth_init:432
 msgid "9. LDAP default Settings"
 msgstr ""
 
@@ -564,17 +572,17 @@ msgstr ""
 msgid "Complete configuration."
 msgstr ""
 
-#: ../ldap_auth:139
+#: ../ldap_auth:143
 #, sh-format
 msgid "Error: '${OPT_DN}' attribute can not be managed!!\\n"
 msgstr ""
 
-#: ../ldap_auth:128
+#: ../ldap_auth:132
 #, sh-format
 msgid "Error: '${OPT_DN}' attribute can not be modified!!\\n"
 msgstr ""
 
-#: ../ldap_auth:175
+#: ../ldap_auth:179
 #, sh-format
 msgid "Error: '${OPT_DN}' attribute is bigger than ${OPT_CHK}\\n"
 msgstr ""
@@ -599,15 +607,15 @@ msgstr ""
 msgid "Error: '${OPT_USERID}' already has access privileges about all host!\\n"
 msgstr ""
 
-#: ../ldap_useradd:230
+#: ../ldap_useradd:232
 msgid "Error: -l option doesn't set!\\n\\n"
 msgstr ""
 
-#: ../ldap_useradd:229
+#: ../ldap_useradd:231
 msgid "Error: -n option doesn't set!\\n\\n"
 msgstr ""
 
-#: ../ldap_useradd:239
+#: ../ldap_useradd:241
 msgid "Error: -p (password) options doesn't set!\\n\\n"
 msgstr ""
 
@@ -616,12 +624,12 @@ msgstr ""
 msgid "Error: Account '${OPT_USERID}' is not found!!!\\n"
 msgstr ""
 
-#: ../ldap_auth:169
+#: ../ldap_auth:173
 #, sh-format
 msgid "Error: Can't found ${OPT_DN} attribute\\n"
 msgstr ""
 
-#: ../ldap_auth:102
+#: ../ldap_auth:106
 #, sh-format
 msgid "Error: Can't found '${OPT_USERID}@${OPT_DOMAIN}' entry\\n"
 msgstr ""
@@ -643,7 +651,7 @@ msgstr ""
 msgid "Error: The options -a can not use with -r\\n"
 msgstr ""
 
-#: ../ldap_ssl:57 ../ldap_ssl:61 ../ldap_ssl:68
+#: ../ldap_ssl:59 ../ldap_ssl:63 ../ldap_ssl:70
 msgid "Error: The options -a, -c, -r can't use combination\\n"
 msgstr ""
 
@@ -651,7 +659,7 @@ msgstr ""
 msgid "Error: The options -r can not use with -a\\n"
 msgstr ""
 
-#: ../ldap_useradd:111
+#: ../ldap_useradd:113
 #, sh-format
 msgid "Error: The value of -g option is bigger than ${MIN_GID}\\n"
 msgstr ""
@@ -661,24 +669,24 @@ msgstr ""
 msgid "Error: The value of -g option is bigger than ${MIN_UID}\\n"
 msgstr ""
 
-#: ../ldap_useradd:110
+#: ../ldap_useradd:112
 msgid "Error: The value of -g option is must numeric\\n"
 msgstr ""
 
-#: ../ldap_useradd:126
+#: ../ldap_useradd:128
 #, sh-format
 msgid "Error: The value of -u option is bigger than ${MIN_UID}\\n"
 msgstr ""
 
-#: ../ldap_useradd:125
+#: ../ldap_useradd:127
 msgid "Error: The value of -u option is must numeric\\n"
 msgstr ""
 
-#: ../ldap_useradd:281
+#: ../ldap_useradd:283
 msgid "Error: Unsupported password scheme.\\n"
 msgstr ""
 
-#: ../ldap_ssl:218
+#: ../ldap_ssl:231
 msgid "Error: failed remove ssl configurations\\n"
 msgstr ""
 
@@ -686,7 +694,7 @@ msgstr ""
 msgid "Error: host attribute is not regist!\\n"
 msgstr ""
 
-#: ../ldap_auth:143
+#: ../ldap_auth:147
 #, sh-format
 msgid "Error: invalid '${OPT_DN}' values!\\n"
 msgstr ""
@@ -696,12 +704,12 @@ msgstr ""
 msgid "Error: invalide GROUPNAME '${OPT_USERID}'\\n"
 msgstr ""
 
-#: ../ldap_auth:82 ../ldap_host_manage:69 ../ldap_useradd:152
+#: ../ldap_auth:86 ../ldap_host_manage:69 ../ldap_useradd:154
 #, sh-format
 msgid "Error: invalide USERNAME '${OPT_USERID}'\\n"
 msgstr ""
 
-#: ../ldap_auth:187
+#: ../ldap_auth:191
 #, sh-format
 msgid "Errot: '${OPT_DN}' ${OPT_DNV} is duplicaed!\\n"
 msgstr ""
@@ -710,23 +718,19 @@ msgstr ""
 msgid "Example\\n"
 msgstr ""
 
-#: ../functions.in:140
-msgid "Failure"
-msgstr ""
-
 #: ../ldap_grpadd:33 ../ldap_grpdel:31
 msgid "GROUPNAME format\\n"
 msgstr ""
 
-#: ../ldap_useradd:221
+#: ../ldap_useradd:223
 msgid "Input access host [Default: none]       "
 msgstr ""
 
-#: ../ldap_useradd:213
+#: ../ldap_useradd:215
 msgid "Input additional group [Default: none]  "
 msgstr ""
 
-#: ../ldap_useradd:244
+#: ../ldap_useradd:246
 msgid "Input password                          "
 msgstr ""
 
@@ -734,7 +738,7 @@ msgstr ""
 msgid "Invalid access privileges or connect failed"
 msgstr ""
 
-#: ../ldap_auth:157
+#: ../ldap_auth:161
 #, sh-format
 msgid "Is right upper informations? [Y/${srYELLOW}N${sEND}] "
 msgstr ""
@@ -743,66 +747,62 @@ msgstr ""
 msgid "Is right your information? [Y/N]"
 msgstr ""
 
-#: ../ldap_ssl:127
+#: ../ldap_ssl:129
 msgid "Make Self signed certificate"
 msgstr ""
 
-#: ../ldap_ssl:110
+#: ../ldap_ssl:112
 msgid "Make Server key"
 msgstr ""
 
-#: ../ldap_ssl:84
+#: ../ldap_ssl:86
 msgid "Make private key"
 msgstr ""
 
-#: ../functions.in:134
-msgid "OK"
-msgstr ""
-
 #: ../ldap_auth:27 ../ldap_grpadd:27 ../ldap_grpdel:27 ../ldap_host_manage:27
-#: ../ldap_replica:27 ../ldap_ssl:27 ../ldap_useradd:27 ../ldap_userdel:27
+#: ../ldap_replica:27 ../ldap_ssl:29 ../ldap_useradd:27 ../ldap_userdel:27
 msgid "Options:\\n"
 msgstr ""
 
-#: ../ldap_useradd:177
+#: ../ldap_useradd:179
 msgid "Password entry GECOS                    "
 msgstr ""
 
-#: ../ldap_useradd:259
+#: ../ldap_useradd:261
 msgid "Re-input password                       "
 msgstr ""
 
-#: ../ldap_ssl:201
+#: ../ldap_ssl:214
 msgid "Regist success"
 msgstr ""
 
-#: ../ldap_ssl:98
+#: ../ldap_ssl:100
 #, sh-format
 msgid "Remove password on ${OPT_PKEY} .. "
 msgstr ""
 
-#: ../ldap_ssl:222
+#: ../ldap_ssl:240
 msgid "Remove success"
 msgstr ""
 
-#: ../ldap_useradd:206
+#: ../ldap_useradd:208
 msgid "Set Expire Date [Default: 0(unlimited)] "
 msgstr ""
 
-#: ../ldap_useradd:194
+#: ../ldap_useradd:196
 msgid "Set GID [Default: 10000(ldapusers)]     "
 msgstr ""
 
-#: ../ldap_useradd:204
+#: ../ldap_useradd:206
 #, sh-format
 msgid "Set Home Directory [Default: ${OPT_HOME}] "
 msgstr ""
 
-#: ../ldap_useradd:208
+#: ../ldap_useradd:210
 msgid "Set Shell [Default: /bin/bash]          "
 msgstr ""
 
-#: ../ldap_useradd:182
+#: ../ldap_useradd:184
 #, sh-format
 msgid "Set UID [Default: ${OPT_UID}]                "
 msgstr ""
@@ -834,10 +834,10 @@ msgid "Usage: ldap_host_manage [OPTIONS] USERNAME HOST1\\n"
 msgstr ""
 
 #: ../ldap_replica:26
-msgid "Usage: ldap_replica [OPTIONS] REPLICA_PROVIDER_SERVER\\n"
+msgid "Usage: ldap_replica [OPTIONS] REPLICA_PROVIEDER_SERVER\\n"
 msgstr ""
 
-#: ../ldap_ssl:26
+#: ../ldap_ssl:28
 msgid "Usage: ldap_ssl [OPTIONS]\\n"
 msgstr ""
 
@@ -849,7 +849,7 @@ msgstr ""
 msgid "Usage: ldap_userdel [OPTIONS] USERNAME ...\\n"
 msgstr ""
 
-#: ../ldap_useradd:173
+#: ../ldap_useradd:175
 msgid "Your Given Name                         "
 msgstr ""
 
@@ -857,15 +857,15 @@ msgstr ""
 msgid "Your Informations:"
 msgstr ""
 
-#: ../ldap_useradd:232
+#: ../ldap_useradd:234
 msgid "Your Name    "
 msgstr ""
 
-#: ../ldap_useradd:233
+#: ../ldap_useradd:235
 msgid "Your Surname "
 msgstr ""
 
-#: ../ldap_useradd:175
+#: ../ldap_useradd:177
 msgid "Your Surname                            "
 msgstr ""
 
@@ -874,7 +874,7 @@ msgstr ""
 msgid "\\n"
 msgstr ""
 
-#: ../ldap_useradd:164
+#: ../ldap_useradd:166
 #, sh-format
 msgid "\\nError: ${OPT_USERID} is already exists!!!\\n\\n"
 msgstr ""
@@ -883,7 +883,7 @@ msgstr ""
 msgid "\\nError: REPLICA user dn format error!\\n\\n"
 msgstr ""
 
-#: ../ldap_auth:33
+#: ../ldap_auth:35
 msgid "\\nExamples:\\n"
 msgstr ""
 
@@ -895,7 +895,7 @@ msgstr ""
 msgid "already exists. skip"
 msgstr ""
 
-#: ../ldap_ssl:105 ../ldap_ssl:141
+#: ../ldap_ssl:107 ../ldap_ssl:143
 msgid "already exsist"
 msgstr ""
 
@@ -924,7 +924,7 @@ msgstr ""
 msgid "ldap_replica: management ldap 2way multi master replication\\n"
 msgstr ""
 
-#: ../ldap_ssl:25
+#: ../ldap_ssl:27
 msgid "ldap_ssl: management ssl on ldap server\\n"
 msgstr ""
 

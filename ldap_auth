@@ -28,6 +28,8 @@ help() {
 	stderr $"    -d               permit modify duplicated uidNumber/gidNumber\n"
 	stderr $"    -g               searching group\n"
 	stderr $"    -h               display this help message and exit\n"
+	stderr $"    -o               change OU. defalut value is People with -u option"
+	stderr $"                     or Group with -g option\n"
 	stderr $"    -u               searching account [default option]\n"
 	stderr $"    -y               None intercative mode\n\n"
 	stderr $"\nExamples:\n"
@@ -56,8 +58,9 @@ MIN_GID=${MIN_GID:=10000}
 OPT_MODE=0
 OPT_INT=0
 OPT_DUP=0
+OPT_OU=
 
-opts=$(${cmd_getopt} -u -n "$(${cmd_basename} "$0")" -o d,g,h,u,y -- "$@")
+opts=$(${cmd_getopt} -u -n "$(${cmd_basename} "$0")" -o d,g,h,o:u,y -- "$@")
 [ $? -ne 0 ] && help
 
 set -- ${opts}
@@ -67,6 +70,7 @@ do
 		-d) OPT_DUP=1 ;;
 		-g) OPT_MODE=1 ;;
 		-h) help ;;
+		-o) OPT_OU=$2; shift ;;
 		-u) OPT_MODE=0 ;;
 		-y) OPT_INT=1 ;;
 		--) shift; break;;
