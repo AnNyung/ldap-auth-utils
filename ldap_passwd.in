@@ -27,7 +27,7 @@ cmd_grep="@GREP@"
 cmd_sed="@SED@"
 cmd_awk="@AWK@"
 cmd_genpasswd="@GENPASSWD@"
-cmd_slappasswd="@SLAPPASSWD"
+cmd_slappasswd="@SLAPPASSWD@"
 cmd_ldapmodify="@LDAPMODIFY@"
 cmd_ldapsearch="@LDAPSEARCH@"
 
