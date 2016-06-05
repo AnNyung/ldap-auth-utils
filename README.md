@@ -42,6 +42,8 @@ This package is composed with follows:
   * ldap_passwd        - change password for general account
   * ldap_replica       - managed 2way multi master replication
 
+If you can read korean, see also [OpenLDAP authentificate Integrate on AnNyung LInux 3 User Guides](https://joungkyun.gitbooks.io/annyung-3-user-guide/content/chapter2-3-auth-integrate-openldap.html).
+
 ## Installation
 
   * dependency
