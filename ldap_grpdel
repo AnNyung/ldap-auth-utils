@@ -55,7 +55,10 @@ set -- ${opts}
 while true
 do
 	case "$1" in
-		-m) OPT_MEMBERS="${OPT_MEMBERS} $2";shift ;;
+		-m)
+			[ -z "${OPT_MEMBERS}" ] && OPT_MEMBERS="$2" || OPT_MEMBERS="${OPT_MEMBERS} $2";
+			shift
+			;;
 		-h) help ;;
 		--) shift; break;;
 	esac
@@ -72,12 +75,16 @@ set_basedn_by_domain "${OPT_GRPNAME}"
 USER_SCHEME="ou=${USER_DN},${BASEDN}"
 GROUP_SCHEME="ou=${GROUP_DN},${BASEDN}"
 
+if [ -n "${OPT_MEMBERS}" ]; then
+	MEMBERS_MSG="
+    EMBERS      : ${OPT_MEMBERS}"
+fi
+
 ${cmd_cat} <<EOF
 
 Your informations:
 
-    GROUP ID     : ${OPT_GRPNAME}
-    MEMBERS      : ${OPT_MEMBERS}
+    GROUP ID     : ${OPT_GRPNAME}${MEMBERS_MSG}
 
 EOF
 

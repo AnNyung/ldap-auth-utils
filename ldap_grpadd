@@ -62,7 +62,10 @@ while true
 do
 	case "$1" in
 		-g) OPT_GID="$2"; shift ;;
-		-m) OPT_MEMBERS="${OPT_MEMBERS} $2";shift ;;
+		-m)
+			[ -z "${OPT_MEMBERS}" ] && OPT_MEMBERS="$2" || OPT_MEMBERS="${OPT_MEMBERS} $2";
+			shift
+			;;
 		-d) OPT_DESC="$2";
 			shift
 
