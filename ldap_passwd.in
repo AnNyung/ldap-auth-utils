@@ -26,6 +26,7 @@ cmd_basename="@BASENAME@"
 cmd_grep="@GREP@"
 cmd_sed="@SED@"
 cmd_awk="@AWK@"
+cmd_perl="@PERL@"
 cmd_genpasswd="@GENPASSWD@"
 cmd_slappasswd="@SLAPPASSWD@"
 cmd_ldapmodify="@LDAPMODIFY@"
@@ -107,6 +108,10 @@ passwd_prompt() {
 password_security() {
 	local pass="$*"
 	local class=0
+	local chk=
+
+	chk=$(echo "${pass}" | ${cmd_perl} -pe "s/[A-Z0-9\`~\!@#\\$%^&*()_=+\[\]{}\\\\|;:,.<>?\/\"'-]//gi")
+	[ -n "$chk" ] && return 3
 
 	if [ ${PASS_MINLEN} -gt 0 ]; then
 		length=${#pass}
@@ -276,6 +281,7 @@ do
 		[ $RET -eq 2 ] && echo $"     .. password complexity problem" && \
 			echo $"        combined with ${PASS_CLASSES} classes with upper case," && \
 			echo $"        lower case, numeric or special character."
+		[ $RET -eq 3 ] && echo $"     .. can not use non-ascii characters"
 		pass=""
 		continue
 	fi

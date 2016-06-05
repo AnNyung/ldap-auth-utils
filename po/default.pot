@@ -86,6 +86,10 @@ msgstr ""
 msgid "        lower case, numeric or special character."
 msgstr ""
 
+#: ../ldap_useradd:257
+msgid "     .. can not use non-ascii characters"
+msgstr ""
+
 #: ../ldap_auth:192
 msgid "       If you want to this value, use -d option\\n"
 msgstr ""

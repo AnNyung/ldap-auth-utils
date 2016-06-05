@@ -325,6 +325,9 @@ password_security() {
 	echo ${pass} | ${cmd_grep} -i "^{\(CRYPT\|SSHA\)}.\+$" >& /dev/null
 	[ $? -eq 0 ] && return 0
 
+	chk=$(echo "${pass}" | ${cmd_perl} -pe "s/[A-Z0-9\`~\!@#\\$%^&*()_=+\[\]{}\\\\|;:,.<>?\/\"'-]//gi")
+	[ -n "$chk" ] && return 3
+
 	if [ ${PASS_MINLEN} -gt 0 ]; then
 		length=${#pass}
 		[ $length -lt ${PASS_MINLEN} ] && return 1

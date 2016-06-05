@@ -254,6 +254,7 @@ if [ -z "${OPT_PASSWD}" ]; then
 			[ $RET -eq 2 ] && echo $"     .. password complexity problem" && \
 							  echo $"        combined with ${PASS_CLASSES} classes with upper case," && \
 							  echo $"        lower case, numeric or special character."
+			[ $RET -eq 3 ] && echo $"     .. can not use non-ascii characters"
 			pass=""
 			continue
 		fi
@@ -301,6 +302,7 @@ if [ $RET -eq 2 ]; then
 	stderr $"       lower case, numeric or special character.\n"
 	exit 1
 fi
+[ $RET -eq 3 ] && stderr $"     .. can not use non-ascii characters\n" && exit 1
 
 
 # check support hostObject 
