@@ -99,7 +99,7 @@ fi
 #
 # user/group check
 #
-BUF="$(${cmd_ldapsearch} ${LDAB_PRIV} -o ldif-wrap=no -b "${SEARCH_DN}"  "${FILTERS}" 2> /dev/null)"
+BUF="$(${cmd_ldapsearch} ${LDAP_PRIV} -o ldif-wrap=no -b "${SEARCH_DN}"  "${FILTERS}" 2> /dev/null)"
 echo "${BUF}" | ${cmd_grep} "# numEntries: " >& /dev/null
 
 if [ $? -ne 0 ]; then
@@ -193,7 +193,7 @@ if [ "${UOPT_DN}" = "GIDNUMBER" -o "${UOPT_DN}" = "UIDNUMBER" ]; then
 fi
 
 
-${cmd_cat} <<EOF | ${cmd_ldapmodify} ${LDAB_PRIV} >& /dev/null
+${cmd_cat} <<EOF | ${cmd_ldapmodify} ${LDAP_PRIV} >& /dev/null
 dn: ${RDN}
 changetype: modify
 replace: ${OPT_DN}
