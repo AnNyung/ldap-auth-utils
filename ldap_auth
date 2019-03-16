@@ -28,7 +28,7 @@ help() {
 	stderr $"    -d               permit modify duplicated uidNumber/gidNumber\n"
 	stderr $"    -g               searching group\n"
 	stderr $"    -h               display this help message and exit\n"
-	stderr $"    -o               change OU. defalut value is People with -u option"
+	stderr $"    -o               change OU. defalut value is People with -u option\\n"
 	stderr $"                     or Group with -g option\n"
 	stderr $"    -u               searching account [default option]\n"
 	stderr $"    -y               None intercative mode\n\n"

@@ -271,7 +271,7 @@ msgid "    -m MERBER_NAME   group member. enable multiple\\n"
 msgstr ""
 
 #: ../ldap_auth:31
-msgid "    -o               change OU. defalut value is People with -u option"
+msgid "    -o               change OU. defalut value is People with -u option\\n"
 msgstr ""
 
 #: ../ldap_ssl:35
